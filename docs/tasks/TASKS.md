@@ -1,0 +1,102 @@
+# Task Management (WBS)
+
+## Status Legend
+
+- ⬜ Not Started
+- 🟦 In Progress
+- ✅ Done
+- ⛔ Blocked
+
+## Repo Commands
+
+- **Build:** `npm run build`
+- **Test:** `npm test`
+- **Lint/Format (optional):** `npm run lint`
+
+## WBS
+
+### 1. Discovery and Planning ✅
+
+- **1.1 Product Discovery ✅**
+  - 1.1.1 Review relevant pi package docs and constraints for remote agent control ✅
+- **1.2 Technical Design Draft ✅**
+  - 1.2.1 Author technical design for Pi Ops Console architecture, APIs, data model, and rollout ✅
+- **1.3 Planning Artifacts ✅**
+  - 1.3.1 Produce implementation WBS and execution log scaffold ✅
+- **1.4 Repository Rebaseline ✅**
+  - 1.4.1 Rebaseline planning docs for greenfield `pi-mission-control` repository context ✅
+
+### 2. Project Bootstrap ✅
+
+- **2.1 Monorepo/App Foundation ✅**
+  - 2.1.1 Initialize TypeScript project structure for web app, control API, and worker packages ✅
+  - 2.1.2 Add shared config (tsconfig, lint, test runner, env handling) and npm scripts ✅
+- **2.2 Development Runtime ✅**
+  - 2.2.1 Add local dev orchestration (concurrently/docker compose) for api + worker + db ✅
+  - 2.2.2 Verify bootstrap build/test/lint commands and update Repo Commands section ✅
+- **2.3 Documentation Bootstrap ✅**
+  - 2.3.1 Add README.md to root and each package (`control-api`, `worker`, `web`) ✅
+
+### 3. Control Plane Backend ⬜
+
+- **3.1 Session/Run API Surface ⬜**
+  - 3.1.1 Define OpenAPI contracts for agents, sessions, messages, runs, approvals ⬜
+  - 3.1.2 Implement REST handlers with auth, validation, and persistence ⬜
+- **3.2 Realtime Event Stream ⬜**
+  - 3.2.1 Implement stream gateway (WebSocket/SSE) with per-run sequence ordering ⬜
+  - 3.2.2 Add reconnect cursor support (`lastSequence`) and replay endpoint ⬜
+
+### 4. Agent Worker Runtime ⬜
+
+- **4.1 Worker Execution Engine ⬜**
+  - 4.1.1 Integrate coding-agent SDK/RPC loop and normalize emitted events ⬜
+  - 4.1.2 Add workspace isolation lifecycle (create, mount, cleanup) ⬜
+- **4.2 Approval and Policy Hooks ⬜**
+  - 4.2.1 Add policy matcher for risky tool calls (bash/edit/write categories) ⬜
+  - 4.2.2 Implement pause/resume flow for approve/reject/timeout ⬜
+
+### 5. Web Application Integration ⬜
+
+- **5.1 Session Console UI ⬜**
+  - 5.1.1 Compose pi-web-ui chat components with remote event adapter ⬜
+  - 5.1.2 Build session/task sidebar and run status indicators ⬜
+- **5.2 Review and Intervention UX ⬜**
+  - 5.2.1 Add execution timeline (tool calls, logs, state transitions) ⬜
+  - 5.2.2 Add approval inbox and action dialogs (approve/reject with context) ⬜
+
+### 6. Hardening, Testing, and Rollout ⬜
+
+- **6.1 Validation ⬜**
+  - 6.1.1 Add unit/integration/contract tests for control plane and worker contracts ⬜
+  - 6.1.2 Run package-level checks/tests for touched modules and fix all failures ⬜
+- **6.2 Rollout Operations ⬜**
+  - 6.2.1 Add metrics, dashboards, and alerts for queue lag, failures, and approval latency ⬜
+  - 6.2.2 Perform staged rollout with feature flag and rollback playbook ⬜
+
+## Per-Task Completion Summaries
+
+- 1.1.1: Reviewed relevant `pi-web-ui`, `pi-agent-core`, and `pi-coding-agent` documentation; captured capabilities/constraints for remote orchestration.
+- 1.2.1: Authored `docs/design/TECHNICAL_DESIGN.md` covering architecture, API/event contracts, data model, control flows, alternatives, testing, and rollout/risks.
+- 1.3.1: Produced initial WBS and execution logging structure.
+- 1.4.1: Rebased plan to this greenfield repo and inserted explicit bootstrap phase before backend/worker/web implementation.
+- 2.1.1: Initialized root npm workspace and TypeScript baseline with package skeletons for `web`, `control-api`, and `worker`; installed dependencies and validated `npm run typecheck` + `npm test`.
+- 2.1.2: Added shared ESLint + Vitest configuration, package-level lint/test scripts, `.env.example`, and smoke tests for each package; validated lint/test/typecheck successfully.
+- 2.2.1: Added Docker Compose services (Postgres/Redis), root orchestration scripts (`infra:up`, `infra:down`, `dev`), and placeholder `dev` entrypoints for API/worker packages.
+- 2.2.2: Verified `npm run build`, `npm test`, `npm run lint`, and `npm run typecheck`; updated Repo Commands with concrete validated commands.
+- 2.3.1: Added onboarding READMEs for repo root and all package workspaces with purpose, status, and command usage.
+- 3.1.1: _(empty until completed)_
+- 3.1.2: _(empty until completed)_
+- 3.2.1: _(empty until completed)_
+- 3.2.2: _(empty until completed)_
+- 4.1.1: _(empty until completed)_
+- 4.1.2: _(empty until completed)_
+- 4.2.1: _(empty until completed)_
+- 4.2.2: _(empty until completed)_
+- 5.1.1: _(empty until completed)_
+- 5.1.2: _(empty until completed)_
+- 5.2.1: _(empty until completed)_
+- 5.2.2: _(empty until completed)_
+- 6.1.1: _(empty until completed)_
+- 6.1.2: _(empty until completed)_
+- 6.2.1: _(empty until completed)_
+- 6.2.2: _(empty until completed)_

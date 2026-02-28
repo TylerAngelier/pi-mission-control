@@ -1,0 +1,28 @@
+{
+  "name": "pi-mission-control",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Pi Ops Console: web control plane for remote pi agents",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run --workspaces build",
+    "test": "npm run --workspaces test",
+    "lint": "npm run --workspaces lint",
+    "typecheck": "npm run --workspaces typecheck",
+    "infra:up": "docker compose up",
+    "infra:down": "docker compose down",
+    "dev": "concurrently -k -n infra,api,worker -c blue,green,magenta \"npm run infra:up\" \"npm run dev --workspace @pi-mission-control/control-api\" \"npm run dev --workspace @pi-mission-control/worker\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@types/node": "^22.15.30",
+    "concurrently": "^9.2.0",
+    "eslint": "^9.20.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.24.1",
+    "vitest": "^3.2.4"
+  }
+}
