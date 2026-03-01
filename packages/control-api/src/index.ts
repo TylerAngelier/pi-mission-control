@@ -29,3 +29,6 @@ export const startControlApiServer = (port: number, options: AppOptions = {}): P
 };
 
 export { createControlApiApp };
+export { InMemoryControlApiStore } from "./store.js";
+export { createControlApiStoreFromEnv } from "./store-factory.js";
+export type { ControlApiStore } from "./control-api-store.js";

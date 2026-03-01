@@ -11,14 +11,20 @@
     "dev": "tsx --env-file=../../.env src/dev.ts",
     "test": "vitest run --config vitest.config.ts",
     "test:coverage": "vitest run --config vitest.config.ts --coverage",
-    "lint": "eslint src --ext .ts"
+    "test:integration": "vitest run --config vitest.config.ts src/**/*.integration.test.ts",
+    "lint": "eslint src --ext .ts",
+    "migration:run": "tsx src/scripts/migrations.ts run",
+    "migration:status": "tsx src/scripts/migrations.ts status",
+    "migration:rollback": "tsx src/scripts/migrations.ts rollback"
   },
   "dependencies": {
     "express": "^4.21.2",
+    "pg": "^8.16.3",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
+    "@types/pg": "^8.15.5",
     "supertest": "^7.1.1",
     "@types/supertest": "^6.0.2",
     "@pi-mission-control/worker": "0.1.0"

@@ -1,6 +1,7 @@
 import express, { type NextFunction, type Request, type Response } from "express";
 import { type ZodTypeAny } from "zod";
 
+import type { ControlApiStore } from "./control-api-store.js";
 import { InMemoryControlApiStore } from "./store.js";
 import {
   approvalDecisionSchema,
@@ -12,7 +13,7 @@ import type { SessionStatus } from "./types.js";
 
 export interface AppOptions {
   authToken?: string;
-  store?: InMemoryControlApiStore;
+  store?: ControlApiStore;
 }
 
 const sessionStatuses: SessionStatus[] = [
@@ -50,22 +51,23 @@ export const createControlApiApp = (options: AppOptions = {}): express.Express =
     next();
   });
 
-  app.get("/v1/agents", (_req, res) => {
-    res.status(200).json({ items: store.listAgents() });
+  app.get("/v1/agents", async (_req, res) => {
+    const items = await store.listAgents();
+    res.status(200).json({ items });
   });
 
-  app.post("/v1/agents", withZodValidation(createAgentSchema), (req, res) => {
-    const agent = store.createAgent(req.body);
+  app.post("/v1/agents", withZodValidation(createAgentSchema), async (req, res) => {
+    const agent = await store.createAgent(req.body);
     res.status(201).json(agent);
   });
 
-  app.get("/v1/agents/:agentId", (req, res) => {
+  app.get("/v1/agents/:agentId", async (req, res) => {
     const agentId = getPathParam(req, res, "agentId");
     if (!agentId) {
       return;
     }
 
-    const agent = store.getAgent(agentId);
+    const agent = await store.getAgent(agentId);
     if (!agent) {
       res.status(404).json({ code: "not_found", message: "Agent not found" });
       return;
@@ -74,7 +76,7 @@ export const createControlApiApp = (options: AppOptions = {}): express.Express =
     res.status(200).json(agent);
   });
 
-  app.get("/v1/sessions", (req, res) => {
+  app.get("/v1/sessions", async (req, res) => {
     const rawStatus = typeof req.query.status === "string" ? req.query.status : undefined;
     if (rawStatus && !sessionStatuses.includes(rawStatus as SessionStatus)) {
       res.status(400).json({ code: "invalid_request", message: "Unsupported session status" });
@@ -82,27 +84,27 @@ export const createControlApiApp = (options: AppOptions = {}): express.Express =
     }
 
     const status = rawStatus as SessionStatus | undefined;
-    res.status(200).json({ items: store.listSessions(status) });
+    res.status(200).json({ items: await store.listSessions(status) });
   });
 
-  app.post("/v1/sessions", withZodValidation(createSessionSchema), (req, res) => {
-    const agent = store.getAgent(req.body.agentId);
+  app.post("/v1/sessions", withZodValidation(createSessionSchema), async (req, res) => {
+    const agent = await store.getAgent(req.body.agentId);
     if (!agent) {
       res.status(404).json({ code: "not_found", message: "Agent not found" });
       return;
     }
 
-    const session = store.createSession(req.body);
+    const session = await store.createSession(req.body);
     res.status(201).json(session);
   });
 
-  app.get("/v1/sessions/:sessionId", (req, res) => {
+  app.get("/v1/sessions/:sessionId", async (req, res) => {
     const sessionId = getPathParam(req, res, "sessionId");
     if (!sessionId) {
       return;
     }
 
-    const session = store.getSession(sessionId);
+    const session = await store.getSession(sessionId);
     if (!session) {
       res.status(404).json({ code: "not_found", message: "Session not found" });
       return;
@@ -114,21 +116,22 @@ export const createControlApiApp = (options: AppOptions = {}): express.Express =
   app.post(
     "/v1/sessions/:sessionId/messages",
     withZodValidation(createMessageSchema),
-    (req, res) => {
+    async (req, res) => {
       const sessionId = getPathParam(req, res, "sessionId");
       if (!sessionId) {
         return;
       }
 
-      const session = store.getSession(sessionId);
+      const session = await store.getSession(sessionId);
       if (!session) {
         res.status(404).json({ code: "not_found", message: "Session not found" });
         return;
       }
 
-      const { run, approval } = store.enqueueMessage({
+      const { run, approval } = await store.enqueueMessage({
         sessionId,
         content: req.body.content,
+        idempotencyKey: req.body.idempotencyKey,
       });
 
       res.status(202).json({
@@ -140,13 +143,13 @@ export const createControlApiApp = (options: AppOptions = {}): express.Express =
     }
   );
 
-  app.get("/v1/sessions/:sessionId/transcript", (req, res) => {
+  app.get("/v1/sessions/:sessionId/transcript", async (req, res) => {
     const sessionId = getPathParam(req, res, "sessionId");
     if (!sessionId) {
       return;
     }
 
-    const session = store.getSession(sessionId);
+    const session = await store.getSession(sessionId);
     if (!session) {
       res.status(404).json({ code: "not_found", message: "Session not found" });
       return;
@@ -164,16 +167,16 @@ export const createControlApiApp = (options: AppOptions = {}): express.Express =
       return;
     }
 
-    res.status(200).json(store.getTranscript(sessionId, fromSequence));
+    res.status(200).json(await store.getTranscript(sessionId, fromSequence));
   });
 
-  app.get("/v1/runs/:runId", (req, res) => {
+  app.get("/v1/runs/:runId", async (req, res) => {
     const runId = getPathParam(req, res, "runId");
     if (!runId) {
       return;
     }
 
-    const run = store.getRun(runId);
+    const run = await store.getRun(runId);
     if (!run) {
       res.status(404).json({ code: "not_found", message: "Run not found" });
       return;
@@ -182,13 +185,13 @@ export const createControlApiApp = (options: AppOptions = {}): express.Express =
     res.status(200).json(run);
   });
 
-  app.get("/v1/runs/:runId/events", (req, res) => {
+  app.get("/v1/runs/:runId/events", async (req, res) => {
     const runId = getPathParam(req, res, "runId");
     if (!runId) {
       return;
     }
 
-    const run = store.getRun(runId);
+    const run = await store.getRun(runId);
     if (!run) {
       res.status(404).json({ code: "not_found", message: "Run not found" });
       return;
@@ -206,7 +209,7 @@ export const createControlApiApp = (options: AppOptions = {}): express.Express =
       return;
     }
 
-    const events = store.getRunEvents(run.id, (fromSequence ?? 1) - 1);
+    const events = await store.getRunEvents(run.id, (fromSequence ?? 1) - 1);
     const highestSequence = events.at(-1)?.sequence ?? (fromSequence ?? 1) - 1;
 
     res.status(200).json({
@@ -216,13 +219,13 @@ export const createControlApiApp = (options: AppOptions = {}): express.Express =
     });
   });
 
-  app.get("/v1/runs/:runId/stream", (req, res) => {
+  app.get("/v1/runs/:runId/stream", async (req, res) => {
     const runId = getPathParam(req, res, "runId");
     if (!runId) {
       return;
     }
 
-    const run = store.getRun(runId);
+    const run = await store.getRun(runId);
     if (!run) {
       res.status(404).json({ code: "not_found", message: "Run not found" });
       return;
@@ -257,14 +260,14 @@ export const createControlApiApp = (options: AppOptions = {}): express.Express =
       res.write(`data: ${JSON.stringify(event)}\n\n`);
     };
 
-    for (const event of store.getRunEvents(run.id, lastSequence)) {
+    for (const event of await store.getRunEvents(run.id, lastSequence)) {
       writeEnvelope(event);
     }
 
     const unsubscribe = store.subscribeToRunEvents(run.id, writeEnvelope);
     const heartbeatInterval = setInterval(() => {
       res.write(": keep-alive\n\n");
-    }, 15000);
+    }, 15_000);
 
     req.on("close", () => {
       clearInterval(heartbeatInterval);
@@ -273,14 +276,14 @@ export const createControlApiApp = (options: AppOptions = {}): express.Express =
     });
   });
 
-  app.post("/v1/runs/:runId/approve", withZodValidation(approvalDecisionSchema), (req, res) => {
+  app.post("/v1/runs/:runId/approve", withZodValidation(approvalDecisionSchema), async (req, res) => {
     const runId = getPathParam(req, res, "runId");
     if (!runId) {
       return;
     }
 
     try {
-      const approval = store.decideApproval({
+      const approval = await store.decideApproval({
         runId,
         approvalId: req.body.approvalId,
         actorId: req.body.actorId,
@@ -299,14 +302,14 @@ export const createControlApiApp = (options: AppOptions = {}): express.Express =
     }
   });
 
-  app.post("/v1/runs/:runId/reject", withZodValidation(approvalDecisionSchema), (req, res) => {
+  app.post("/v1/runs/:runId/reject", withZodValidation(approvalDecisionSchema), async (req, res) => {
     const runId = getPathParam(req, res, "runId");
     if (!runId) {
       return;
     }
 
     try {
-      const approval = store.decideApproval({
+      const approval = await store.decideApproval({
         runId,
         approvalId: req.body.approvalId,
         actorId: req.body.actorId,
