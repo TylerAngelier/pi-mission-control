@@ -1,5 +1,7 @@
 # Pi Mission Control
 
+[![CI (Drone)](https://drone.example.com/api/badges/REPLACE_ME_OWNER/REPLACE_ME_REPO/status.svg)](https://drone.example.com/REPLACE_ME_OWNER/REPLACE_ME_REPO)
+
 Web control plane for remote pi agents.
 
 This repository contains a TypeScript workspace with:
@@ -105,6 +107,12 @@ npm run build
 - `npm run migration:run` / `npm run migration:status` / `npm run migration:rollback` — manage control-api migrations
 - `npm run test:setup-db` / `npm run test:teardown-db` — reset integration test database
 - `npm run test:integration` — run postgres integration tests
+
+## CI/CD (Drone)
+
+- Pipeline definition: `.drone.yml`
+- Setup + branch protection + troubleshooting: `docs/ci/DRONE.md`
+- Replace the README badge URL placeholders with your Drone host/repo path after enabling Drone.
 
 ## Project Status
 

@@ -20,7 +20,8 @@
     "test:teardown-db": "npm run test:teardown-db --workspace @pi-mission-control/control-api",
     "infra:up": "docker compose up",
     "infra:down": "docker compose down",
-    "dev": "concurrently -k -n infra,api,worker -c blue,green,magenta \"npm run infra:up\" \"npm run dev --workspace @pi-mission-control/control-api\" \"npm run dev --workspace @pi-mission-control/worker\""
+    "dev": "concurrently -k -n infra,api,worker -c blue,green,magenta \"npm run infra:up\" \"npm run dev --workspace @pi-mission-control/control-api\" \"npm run dev --workspace @pi-mission-control/worker\"",
+    "ci:drone:local": "bash scripts/ci/drone-local-validate.sh"
   },
   "devDependencies": {
     "@eslint/js": "^9.20.0",
