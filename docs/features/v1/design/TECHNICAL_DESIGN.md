@@ -90,13 +90,19 @@
     ```
 
 - **Data model changes:** schema, migrations, backward-compat notes
+
+  > **Note:** The schema below represents the conceptual design. For the canonical implemented schema, see [`docs/features/persistence/TECHNICAL_DESIGN.md`](../../features/persistence/TECHNICAL_DESIGN.md) and the migrations in `packages/control-api/src/persistence/migrations/`.
+
+  - `users(id, email, display_name, created_at, updated_at)`
   - `agents(id, name, model, default_tools, policy_id, created_at, updated_at)`
-  - `workspaces(id, repo_url, default_branch, isolation_mode, created_at)`
+  - `workspaces(id, name, repo_url, default_branch, isolation_mode, created_at, updated_at)`
   - `sessions(id, agent_id, workspace_id, status, title, created_by, created_at, updated_at)`
   - `runs(id, session_id, status, started_at, finished_at, error_code, cost_usd)`
-  - `messages(id, session_id, run_id, role, content_json, sequence, created_at)`
-  - `events(id, run_id, sequence, type, payload_json, created_at)`
-  - `approvals(id, run_id, tool, payload_json, state, decided_by, decided_at)`
+  - `transcript_events(id, session_id, run_id, sequence, timestamp, event_type, payload_json)` — session-scoped event log
+  - `run_events(id, run_id, session_id, sequence, timestamp, event_type, payload_json)` — run-scoped event log with NOTIFY triggers
+  - `approvals(id, run_id, state, created_at, decided_at, actor_id, reason)`
+  - `idempotency_keys(key, run_id, approval_id, created_at, expires_at)` — deduplication for message enqueue
+  - `schema_migrations(id, filename, applied_at)` — migration tracking
   - Backward compatibility: no breaking changes to existing `pi-web-ui` components; integration occurs via adapter layer and additional app-level state.
 
 - **Control flow:** step-by-step sequences for key paths
@@ -177,7 +183,9 @@
   - Unbounded workspace/resource growth -> TTL cleanup + quotas + retention policies.
   - Security regressions in remote execution -> isolation hardening + approval defaults + audit.
   - User confusion between session/task/run concepts -> explicit UI hierarchy and terminology.
+- Resolved decisions
+  - **Queue/event infrastructure:** PostgreSQL NOTIFY/LISTEN with trigger-based pub/sub (see [`docs/features/persistence/`](../../features/persistence/)).
+  - **Persistence mode:** Dual mode (in-memory for dev, PostgreSQL for production) via `PERSISTENCE_MODE` env var.
 - Open questions
-  - Preferred queue/event infrastructure (Redis Streams vs NATS vs Postgres-based queue).
   - Required tenancy model for first release (single-team vs org multi-tenant).
   - Whether to support direct git operations in v1 or gate behind explicit policy profiles.
