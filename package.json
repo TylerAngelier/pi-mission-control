@@ -21,7 +21,8 @@
     "infra:up": "docker compose up",
     "infra:down": "docker compose down",
     "dev": "concurrently -k -n infra,api,worker -c blue,green,magenta \"npm run infra:up\" \"npm run dev --workspace @pi-mission-control/control-api\" \"npm run dev --workspace @pi-mission-control/worker\"",
-    "ci:drone:local": "bash scripts/ci/drone-local-validate.sh"
+    "ci:drone:local": "bash scripts/ci/drone-local-validate.sh",
+    "hooks:install": "bash scripts/install-hooks.sh"
   },
   "devDependencies": {
     "@eslint/js": "^9.20.0",

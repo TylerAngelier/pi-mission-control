@@ -14,3 +14,5 @@ export {
   type SessionStore,
   type SessionSummary,
 } from "./session-store.js";
+
+export * from "./chat/index.js";

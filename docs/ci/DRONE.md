@@ -72,6 +72,29 @@ After first successful Drone runs:
 
 ## Local parity commands
 
+### Pre-commit hook (automatic)
+
+A pre-commit Git hook is installed that automatically runs the full Drone CI pipeline locally before each commit. This provides early feedback and ensures commits only pass when CI would pass.
+
+The hook runs:
+```bash
+npm run ci:drone:local
+```
+
+To skip the hook (e.g., during rapid development):
+```bash
+git commit --no-verify -m "WIP message"
+```
+
+To install or reinstall the hooks:
+```bash
+npm run hooks:install
+```
+
+Hooks are tracked in `scripts/githooks/` and installed to `.git/hooks/`.
+
+### Manual execution
+
 Run before pushing:
 
 ```bash
@@ -81,7 +104,7 @@ npm test
 npm run build
 ```
 
-Or run the local Drone parity script:
+Or run the local Drone parity script manually:
 
 ```bash
 npm run ci:drone:local
