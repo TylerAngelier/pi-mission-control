@@ -3,12 +3,13 @@
  */
 
 import React, { useState, useEffect, useRef } from "react";
-import type { ChatMessage, ToolCall, ExecutionEvent } from "../types.js";
+import type { ChatMessage, ToolCall, ExecutionEvent, ApprovalRequiredEvent } from "../types.js";
 import { RemoteEventAdapter } from "../remote-event-adapter.js";
 import { ChatMessage as ChatMessageComponent } from "./ChatMessage.js";
 import { ToolCall as ToolCallComponent } from "./ToolCall.js";
 import { RunStatus } from "./RunStatus.js";
 import { ExecutionTimeline, toTimelineEvents } from "./ExecutionTimeline.js";
+import { ApprovalInbox } from "./ApprovalInbox.js";
 
 export interface ChatProps {
   sessionId: string;
@@ -38,7 +39,21 @@ export const Chat: React.FC<ChatProps> = ({
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentRunId, setCurrentRunId] = useState<string | undefined>();
   const [isTimelineExpanded, setIsTimelineExpanded] = useState(true);
+  const [approvals, setApprovals] = useState<ApprovalRequiredEvent[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Handle approval decisions
+  const handleApprove = async (approvalId: string, reason?: string) => {
+    // In a real implementation, this would call the control API
+    console.log(`Approving ${approvalId} with reason:`, reason);
+    setApprovals((prev) => prev.filter((a) => a.approvalId !== approvalId));
+  };
+
+  const handleReject = async (approvalId: string, reason?: string) => {
+    // In a real implementation, this would call the control API
+    console.log(`Rejecting ${approvalId} with reason:`, reason);
+    setApprovals((prev) => prev.filter((a) => a.approvalId !== approvalId));
+  };
 
   const adapterRef = useRef<RemoteEventAdapter | null>(null);
 
@@ -76,6 +91,25 @@ export const Chat: React.FC<ChatProps> = ({
       },
       onEvent: (event) => {
         setEvents((prev) => [...prev, event]);
+
+        // Track approval_required events
+        if (event.type === "approval_required") {
+          const approval = event.data as ApprovalRequiredEvent;
+          setApprovals((prev) => {
+            // Avoid duplicates
+            const exists = prev.some((a) => a.approvalId === approval.approvalId);
+            if (exists) {
+              return prev;
+            }
+            return [...prev, approval];
+          });
+        }
+
+        // Remove approval when decided
+        if (event.type === "approval_decided") {
+          const decidedApproval = event.data as ApprovalRequiredEvent;
+          setApprovals((prev) => prev.filter((a) => a.approvalId !== decidedApproval.approvalId));
+        }
       },
       onStateChange: (state) => {
         if (state.isStreaming !== undefined) {
@@ -150,6 +184,13 @@ export const Chat: React.FC<ChatProps> = ({
 
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Approval Inbox */}
+      <ApprovalInbox
+        approvals={approvals}
+        onApprove={handleApprove}
+        onReject={handleReject}
+      />
     </div>
   );
 };
