@@ -57,6 +57,12 @@ Run the full workspace test suite:
 npm test
 ```
 
+Run coverage across all workspaces:
+
+```bash
+npm run test:coverage
+```
+
 Run tests for a single package:
 
 ```bash

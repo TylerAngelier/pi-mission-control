@@ -39,6 +39,156 @@ describe("control-api routes", () => {
     expect(response.body.code).toBe("unauthorized");
   });
 
+  it("validates request payloads and query params", async () => {
+    const invalidAgent = await request(server)
+      .post("/v1/agents")
+      .set(authHeader)
+      .send({ name: "missing-model" });
+
+    expect(invalidAgent.status).toBe(400);
+    expect(invalidAgent.body.code).toBe("invalid_request");
+
+    const invalidStatus = await request(server)
+      .get("/v1/sessions")
+      .set(authHeader)
+      .query({ status: "bogus" });
+
+    expect(invalidStatus.status).toBe(400);
+    expect(invalidStatus.body.code).toBe("invalid_request");
+
+    const invalidStream = await request(server)
+      .get("/v1/runs/run_does_not_exist/stream")
+      .set(authHeader)
+      .query({ lastSequence: -1 });
+
+    expect(invalidStream.status).toBe(404);
+    expect(invalidStream.body.code).toBe("not_found");
+  });
+
+  it("returns not found for missing resources and invalid cursors", async () => {
+    const missingSession = await request(server)
+      .post("/v1/sessions")
+      .set(authHeader)
+      .send({
+        agentId: "agent_missing",
+        workspaceId: "workspace_default",
+      });
+
+    expect(missingSession.status).toBe(404);
+
+    const missingRun = await request(server)
+      .post("/v1/runs/run_missing/approve")
+      .set(authHeader)
+      .send({
+        approvalId: "apr_missing",
+        actorId: "user_1",
+      });
+
+    expect(missingRun.status).toBe(404);
+
+    const createAgent = await request(server)
+      .post("/v1/agents")
+      .set(authHeader)
+      .send({
+        name: "cursor-validator",
+        model: "anthropic/claude-sonnet-4-5-20250929",
+      });
+
+    const createSession = await request(server)
+      .post("/v1/sessions")
+      .set(authHeader)
+      .send({
+        agentId: createAgent.body.id,
+        workspaceId: "workspace_default",
+      });
+
+    const invalidTranscriptCursor = await request(server)
+      .get(`/v1/sessions/${createSession.body.id}/transcript`)
+      .set(authHeader)
+      .query({ fromSequence: 0 });
+
+    expect(invalidTranscriptCursor.status).toBe(400);
+
+    const enqueue = await request(server)
+      .post(`/v1/sessions/${createSession.body.id}/messages`)
+      .set(authHeader)
+      .send({ content: "cursor check" });
+
+    const invalidReplayCursor = await request(server)
+      .get(`/v1/runs/${enqueue.body.runId}/events`)
+      .set(authHeader)
+      .query({ fromSequence: 0 });
+
+    expect(invalidReplayCursor.status).toBe(400);
+
+    const invalidLastSequence = await request(server)
+      .get(`/v1/runs/${enqueue.body.runId}/stream`)
+      .set(authHeader)
+      .query({ lastSequence: -1 });
+
+    expect(invalidLastSequence.status).toBe(400);
+  });
+
+  it("returns conflict for duplicate approval decisions and not found for mismatched approvals", async () => {
+    const createAgent = await request(server)
+      .post("/v1/agents")
+      .set(authHeader)
+      .send({
+        name: "approval-conflict",
+        model: "anthropic/claude-sonnet-4-5-20250929",
+      });
+
+    const createSession = await request(server)
+      .post("/v1/sessions")
+      .set(authHeader)
+      .send({
+        agentId: createAgent.body.id,
+        workspaceId: "workspace_default",
+      });
+
+    const firstRun = await request(server)
+      .post(`/v1/sessions/${createSession.body.id}/messages`)
+      .set(authHeader)
+      .send({ content: "first" });
+
+    const secondRun = await request(server)
+      .post(`/v1/sessions/${createSession.body.id}/messages`)
+      .set(authHeader)
+      .send({ content: "second" });
+
+    const firstApprove = await request(server)
+      .post(`/v1/runs/${firstRun.body.runId}/approve`)
+      .set(authHeader)
+      .send({
+        approvalId: firstRun.body.approvalId,
+        actorId: "reviewer",
+      });
+
+    expect(firstApprove.status).toBe(200);
+
+    const duplicateApprove = await request(server)
+      .post(`/v1/runs/${firstRun.body.runId}/approve`)
+      .set(authHeader)
+      .send({
+        approvalId: firstRun.body.approvalId,
+        actorId: "reviewer",
+      });
+
+    expect(duplicateApprove.status).toBe(409);
+    expect(duplicateApprove.body.code).toBe("conflict");
+
+    const mismatchedApproval = await request(server)
+      .post(`/v1/runs/${firstRun.body.runId}/approve`)
+      .set(authHeader)
+      .send({
+        approvalId: secondRun.body.approvalId,
+        actorId: "reviewer",
+      });
+
+    expect(mismatchedApproval.status).toBe(404);
+    expect(mismatchedApproval.body.code).toBe("not_found");
+  });
+
   it("creates agent and session, then enqueues a message and approves run", async () => {
     const createAgent = await request(server)
       .post("/v1/agents")
