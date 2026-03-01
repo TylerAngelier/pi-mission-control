@@ -7,3 +7,20 @@ export const health = (): WorkerHealth => ({
   service: "worker",
   status: "ok",
 });
+
+export { WorkerExecutionEngine, normalizeRuntimeEvent } from "./engine.js";
+export { CodingAgentSdkRpcRuntime } from "./runtime.js";
+export { LocalWorkspaceManager } from "./workspace.js";
+export type {
+  CodingAgentRpcClient,
+  WorkerRuntime,
+} from "./runtime.js";
+export type {
+  RunStreamEventEnvelope,
+  WorkerRunRequest,
+  WorkerRuntimeEvent,
+} from "./types.js";
+export type {
+  WorkerWorkspace,
+  WorkspaceManager,
+} from "./workspace.js";

@@ -47,11 +47,11 @@
   - 3.2.1 Implement stream gateway (WebSocket/SSE) with per-run sequence ordering ✅
   - 3.2.2 Add reconnect cursor support (`lastSequence`) and replay endpoint ✅
 
-### 4. Agent Worker Runtime ⬜
+### 4. Agent Worker Runtime 🟦
 
-- **4.1 Worker Execution Engine ⬜**
-  - 4.1.1 Integrate coding-agent SDK/RPC loop and normalize emitted events ⬜
-  - 4.1.2 Add workspace isolation lifecycle (create, mount, cleanup) ⬜
+- **4.1 Worker Execution Engine ✅**
+  - 4.1.1 Integrate coding-agent SDK/RPC loop and normalize emitted events ✅
+  - 4.1.2 Add workspace isolation lifecycle (create, mount, cleanup) ✅
 - **4.2 Approval and Policy Hooks ⬜**
   - 4.2.1 Add policy matcher for risky tool calls (bash/edit/write categories) ⬜
   - 4.2.2 Implement pause/resume flow for approve/reject/timeout ⬜
@@ -90,8 +90,8 @@
 - 3.1.2: Implemented Express-based REST handlers with bearer auth, Zod request validation, and in-memory persistence for agents/sessions/runs/approvals/transcripts; added integration tests for auth and end-to-end enqueue/approve flow.
 - 3.2.1: Implemented SSE run-event stream endpoint (`GET /v1/runs/:runId/stream`) with in-memory pub/sub and per-run sequence ordering; added integration test verifying ordered stream envelopes.
 - 3.2.2: Added run-event replay endpoint (`GET /v1/runs/:runId/events?fromSequence=`) and stream cursor support (`lastSequence`) for SSE reconnect semantics; added integration test coverage for replay/cursor behavior.
-- 4.1.1: _(empty until completed)_
-- 4.1.2: _(empty until completed)_
+- 4.1.1: Implemented worker SDK/RPC execution abstractions (`WorkerRuntime`, `CodingAgentSdkRpcRuntime`) and a `WorkerExecutionEngine` that normalizes runtime events into control-plane envelopes with per-run sequence ordering; added worker tests for normalization, sequencing, runtime error mapping, and RPC delegation; validated full workspace lint/test/typecheck/build.
+- 4.1.2: Added `LocalWorkspaceManager` with explicit create/mount/cleanup lifecycle for isolated worker directories, including symlink-based repo mount tracking and error handling for missing/already-mounted workspaces; expanded worker tests to cover lifecycle success and error paths; validated full workspace lint/test/typecheck/build.
 - 4.2.1: _(empty until completed)_
 - 4.2.2: _(empty until completed)_
 - 5.1.1: _(empty until completed)_

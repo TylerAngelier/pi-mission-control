@@ -3,7 +3,7 @@ const queueUrl = process.env.MISSION_CONTROL_QUEUE_URL ?? "redis://localhost:637
 
 console.log(`[worker] dev placeholder started (concurrency=${concurrency})`);
 console.log(`[worker] queue endpoint: ${queueUrl}`);
-console.log("[worker] waiting for worker runtime implementation...");
+console.log("[worker] SDK/RPC execution engine scaffold is available.");
 
 setInterval(() => {
   console.log("[worker] heartbeat");

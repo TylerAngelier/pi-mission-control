@@ -452,3 +452,72 @@
 - Added reconnect cursor support to avoid re-sending already-consumed SSE events.
 - Kept stream contract and implementation aligned with OpenAPI updates.
 - Preserved green lint/test/typecheck gates across the repo.
+
+## 4.1.1 Integrate coding-agent SDK/RPC loop and normalize emitted events
+
+**Status:** 🟦 In Progress → ✅ Done
+
+### Changes
+
+- `packages/worker/src/types.ts`: added worker run request/runtime event types and normalized run stream envelope shape.
+- `packages/worker/src/runtime.ts`: added `WorkerRuntime` abstraction plus `CodingAgentSdkRpcRuntime` adapter for SDK/RPC client loop integration.
+- `packages/worker/src/engine.ts`: added `WorkerExecutionEngine` and `normalizeRuntimeEvent` mapping to convert runtime events into control-plane-compatible envelopes with per-run sequence ordering.
+- `packages/worker/src/index.ts`: exported worker runtime/engine APIs for package consumers.
+- `packages/worker/src/dev.ts`: updated startup log to reflect available SDK/RPC execution scaffold.
+- `packages/worker/src/index.test.ts`: added tests for event normalization, sequencing, runtime error mapping, and RPC delegation.
+- `docs/tasks/TASKS.md`: marked task `4.1.1` complete and updated roll-up status for section 4/4.1.
+
+### Tests Added/Updated
+
+- `packages/worker/src/index.test.ts`: added 4 new coverage scenarios for runtime loop delegation, normalized event shape, sequence ordering, and runtime failure handling.
+
+### Commands Run
+
+- `npm run lint --workspace @pi-mission-control/worker && npm test --workspace @pi-mission-control/worker && npm run typecheck --workspace @pi-mission-control/worker && npm run build --workspace @pi-mission-control/worker` → all succeeded.
+- `npm run lint && npm test && npm run typecheck && npm run build` → all workspace checks succeeded.
+
+### Notes
+
+- The SDK/RPC integration is intentionally adapter-based (`CodingAgentRpcClient`) to keep the worker decoupled from transport implementation details while enabling direct wiring in a later task.
+- Workspace/container lifecycle is still pending and tracked under `4.1.2`.
+
+### Completion Summary
+
+- Added a concrete worker execution engine capable of consuming runtime event streams.
+- Normalized runtime events into deterministic control-plane envelopes suitable for API stream persistence/fan-out.
+- Added failure handling that emits `run_failed` when runtime streaming throws.
+- Added unit coverage and validated green lint/test/typecheck/build gates across the full monorepo.
+
+## 4.1.2 Add workspace isolation lifecycle (create, mount, cleanup)
+
+**Status:** 🟦 In Progress → ✅ Done
+
+### Changes
+
+- `packages/worker/src/workspace.ts`: added `LocalWorkspaceManager` with explicit `createWorkspace`, `mountWorkspace`, and `cleanupWorkspace` lifecycle methods.
+- `packages/worker/src/workspace.ts`: added workspace metadata model (`WorkerWorkspace`) and lifecycle manager interfaces.
+- `packages/worker/src/index.ts`: exported workspace lifecycle APIs for package consumers.
+- `packages/worker/src/index.test.ts`: added workspace lifecycle integration-style tests for create/mount/cleanup and error cases.
+- `packages/worker/README.md`: updated package scaffold docs to include runtime engine and workspace lifecycle components.
+- `docs/tasks/TASKS.md`: marked task `4.1.2` complete and rolled up `4.1` status to ✅.
+
+### Tests Added/Updated
+
+- `packages/worker/src/index.test.ts`: added 2 workspace lifecycle tests covering happy-path directory creation/symlink mount/cleanup and missing-workspace error handling.
+
+### Commands Run
+
+- `npm run lint --workspace @pi-mission-control/worker && npm test --workspace @pi-mission-control/worker && npm run typecheck --workspace @pi-mission-control/worker && npm run build --workspace @pi-mission-control/worker` → all succeeded.
+- `npm run lint && npm test && npm run typecheck && npm run build` → all workspace checks succeeded.
+
+### Notes
+
+- Mounting currently uses local directory symlinks as a lightweight stand-in for container/worktree mounts; stronger isolation mechanisms can be swapped in behind the same interface later.
+- Approval/policy runtime controls remain pending under section `4.2`.
+
+### Completion Summary
+
+- Implemented a concrete workspace lifecycle manager for worker-run isolation.
+- Added deterministic workspace metadata tracking and guardrails for invalid lifecycle operations.
+- Added tests to validate lifecycle behavior and error paths.
+- Preserved green lint/test/typecheck/build gates across the monorepo.
