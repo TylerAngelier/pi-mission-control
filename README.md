@@ -1,6 +1,6 @@
 # Pi Mission Control
 
-[![CI (Drone)](https://drone.example.com/api/badges/REPLACE_ME_OWNER/REPLACE_ME_REPO/status.svg)](https://drone.example.com/REPLACE_ME_OWNER/REPLACE_ME_REPO)
+[![CI (Drone)](https://drone.trangelier.dev/api/badges/TylerAngelier/pi-mission-control/status.svg)](https://drone.trangelier.dev/TylerAngelier/pi-mission-control)
 
 Web control plane for remote pi agents.
 
@@ -112,7 +112,6 @@ npm run build
 
 - Pipeline definition: `.drone.yml`
 - Setup + branch protection + troubleshooting: `docs/ci/DRONE.md`
-- Replace the README badge URL placeholders with your Drone host/repo path after enabling Drone.
 
 ## Project Status
 
