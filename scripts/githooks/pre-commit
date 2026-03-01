@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "[pre-commit] Running Drone CI pipeline locally..."
+if ! npm run ci:drone:local; then
+    echo ""
+    echo "[pre-commit] ❌ CI pipeline failed. Commit aborted."
+    echo "[pre-commit] Fix the issues above and try again."
+    echo "[pre-commit] Use 'git commit --no-verify' to skip this hook."
+    exit 1
+fi
+
+echo "[pre-commit] ✅ CI pipeline passed."
+exit 0

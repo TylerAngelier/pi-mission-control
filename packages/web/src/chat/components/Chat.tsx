@@ -8,6 +8,7 @@ import { RemoteEventAdapter } from "../remote-event-adapter.js";
 import { ChatMessage as ChatMessageComponent } from "./ChatMessage.js";
 import { ToolCall as ToolCallComponent } from "./ToolCall.js";
 import { RunStatus } from "./RunStatus.js";
+import { ExecutionTimeline, toTimelineEvents } from "./ExecutionTimeline.js";
 
 export interface ChatProps {
   sessionId: string;
@@ -36,6 +37,7 @@ export const Chat: React.FC<ChatProps> = ({
   const [events, setEvents] = useState<ExecutionEvent[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentRunId, setCurrentRunId] = useState<string | undefined>();
+  const [isTimelineExpanded, setIsTimelineExpanded] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const adapterRef = useRef<RemoteEventAdapter | null>(null);
@@ -139,18 +141,12 @@ export const Chat: React.FC<ChatProps> = ({
           </div>
         )}
 
-        {events.length > 0 && (
-          <div className="chat__events">
-            {events.map((event) => (
-              <div key={event.id} className="chat__event" data-testid="chat-event">
-                <span className="chat__event-type">{event.type}</span>
-                <span className="chat__event-timestamp">
-                  {new Date(event.timestamp).toLocaleTimeString()}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+        <ExecutionTimeline
+          events={toTimelineEvents(events, toolCalls)}
+          toolCalls={toolCalls}
+          isExpanded={isTimelineExpanded}
+          onToggle={() => setIsTimelineExpanded(!isTimelineExpanded)}
+        />
 
         <div ref={messagesEndRef} />
       </div>

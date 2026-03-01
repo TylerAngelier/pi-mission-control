@@ -675,3 +675,44 @@
 - Established React component testing infrastructure with @testing-library and jsdom.
 - Added comprehensive test coverage for all new UI components (30 component tests).
 - Preserved green lint/test/typecheck/build gates across the entire workspace.
+
+## 5.2.1 Add execution timeline (tool calls, logs, state transitions)
+
+**Status:** In Progress → ✅ Done
+
+### Changes
+
+- `packages/web/src/chat/components/ExecutionTimeline.tsx`: created comprehensive `ExecutionTimeline` React component with expand/collapse toggle, chronological event list, event type icons, severity-based color coding, and collapsible detail sections for event payloads.
+- `packages/web/src/chat/components/ExecutionTimeline.tsx`: implemented `toTimelineEvents` helper function to merge and sort `ExecutionEvent` and `ToolCall` arrays into unified `TimelineEvent` format with proper type categorization (state_change, approval, tool_call, tool_output, message, error).
+- `packages/web/src/chat/components/ExecutionTimeline.tsx`: added `TimelineEvent` type defining event structure (id, timestamp, type, title, description, details, status, severity).
+- `packages/web/src/chat/components/ExecutionTimeline.tsx`: implemented `TimelineItem` sub-component for rendering individual timeline events with appropriate icons, colors, and detail expansion.
+- `packages/web/src/chat/components/Chat.tsx`: integrated `ExecutionTimeline` into chat interface using `toTimelineEvents` to convert events and tool calls; added `isTimelineExpanded` state with toggle handler.
+- `packages/web/src/chat/components/ExecutionTimeline.test.tsx`: added 15 comprehensive tests covering timeline rendering (expanded/collapsed states), empty state, toggle interactions, event sorting by timestamp, event type icons, status display, and `toTimelineEvents` helper function behavior.
+- `packages/web/src/chat/index.ts`: exported `ExecutionTimeline`, `toTimelineEvents`, `TimelineEvent`, and `ExecutionTimelineProps` types.
+
+### Tests Added/Updated
+
+- `packages/web/src/chat/components/ExecutionTimeline.test.tsx`: 15 tests covering timeline component behavior, event rendering, sorting, and helper function conversion.
+
+### Commands Run
+
+- `cd packages/web && npm run test` → succeeded; all 61 tests passed (including 15 new timeline tests).
+- `npm run lint` → succeeded after fixing unused parameter and switch case declaration issues.
+- `npm run typecheck` → succeeded after fixing type compatibility issues (ExecutionEvent to TimelineEvent conversion) and array access safety.
+- `npm run build` → succeeded; all packages compiled successfully.
+- `npm test` → succeeded; all workspace tests passed (worker: 14, control-api: 12, web: 61).
+
+### Notes
+
+- Timeline events are sorted descending (newest first) to provide immediate visibility into latest activity.
+- Event severity drives color coding: error (red), warning (amber), info (blue).
+- Tool calls with status (pending/completed/failed) display appropriate visual indicators.
+- `<details>` element used for collapsible content; jsdom test environment has limited support for details toggle behavior.
+
+### Completion Summary
+
+- Delivered fully functional ExecutionTimeline component for chronological event display.
+- Implemented helper function to unify execution events and tool calls into timeline format.
+- Integrated timeline into Chat component with expand/collapse capability.
+- Added comprehensive test coverage for timeline component and helper function.
+- Preserved green lint/test/typecheck/build gates across the entire workspace.

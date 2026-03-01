@@ -23,6 +23,8 @@ export { ChatMessage as ChatMessageComponent } from "./components/ChatMessage.js
 export { ToolCall as ToolCallComponent } from "./components/ToolCall.js";
 export { Sidebar } from "./components/Sidebar.js";
 export { RunStatus } from "./components/RunStatus.js";
+export { ExecutionTimeline, toTimelineEvents } from "./components/ExecutionTimeline.js";
 export type { ChatProps } from "./components/Chat.js";
 export type { SidebarProps } from "./components/Sidebar.js";
 export type { RunStatusProps } from "./components/RunStatus.js";
+export type { ExecutionTimelineProps, TimelineEvent } from "./components/ExecutionTimeline.js";

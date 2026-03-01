@@ -88,7 +88,32 @@ npm run test:integration
 npm run test:teardown-db
 ```
 
-Recommended verification order before committing:
+### Git Pre-commit Hook
+
+A pre-commit hook automatically runs the full CI pipeline before each commit. If any check fails, the commit is blocked.
+
+To skip the hook:
+```bash
+git commit --no-verify -m "WIP message"
+```
+
+The pre-commit hook runs `npm run ci:drone:local`, which executes:
+- `npm run lint`
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+- Full integration tests with Docker Compose
+
+To install or reinstall the hooks:
+```bash
+npm run hooks:install
+```
+
+Hooks are tracked in `scripts/githooks/` and installed to `.git/hooks/`.
+
+### Manual Verification
+
+To run checks manually before pushing:
 
 ```bash
 npm run lint
@@ -115,14 +140,35 @@ npm run build
 
 ## Project Status
 
-Persistence migration work is actively tracked in:
+### v1 Feature Implementation (In Progress)
+
+The v1 Pi Ops Console feature implementation is actively tracked in:
+
+- `docs/features/v1/design/TECHNICAL_DESIGN.md` — Architecture and API design
+- `docs/features/v1/tasks/TASKS.md` — Implementation task breakdown (WBS)
+- `docs/features/v1/tasks/EXECUTION_LOG.md` — Detailed execution log
+
+**Progress Summary:**
+
+✅ **Completed Sections:**
+- Discovery and Planning (1.x)
+- Project Bootstrap (2.x)
+- Control Plane Backend (3.x) — REST API, SSE streaming, event replay
+- Agent Worker Runtime (4.x) — SDK/RPC integration, workspace isolation, approval flow
+- Web Application Integration (5.x) — React chat UI, sidebar, run status
+
+🟦 **Remaining Work:**
+- Review and Intervention UX (5.2.x) — Execution timeline, approval dialogs
+- Hardening, Testing, and Rollout (6.x) — Validation, monitoring, staged rollout
+
+**Current Branch:** `feat/v1-web-app-integration`
+
+### Persistence Migration (Completed)
+
+Database persistence layer for control-api is documented in:
 
 - `docs/persistence/TECHNICAL_DESIGN.md`
 - `docs/persistence/WBS.md`
 - `docs/persistence/EXECUTION_LOG.md`
 
-Core architecture planning is documented in:
-
-- `docs/design/TECHNICAL_DESIGN.md`
-- `docs/tasks/TASKS.md`
-- `docs/tasks/EXECUTION_LOG.md`
+This work provides PostgreSQL-backed storage for sessions, runs, approvals, and transcripts.
