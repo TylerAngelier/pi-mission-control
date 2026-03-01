@@ -172,3 +172,34 @@ This execution log tracks the implementation of the persistence layer migration 
 - Added explicit isolated docker-compose test environment definition.
 - Expanded integration coverage for postgres NOTIFY/LISTEN and worker approval-controller behavior.
 - Kept all workspace quality gates green after integration tooling additions.
+
+## 9.2 Documentation and developer workflow updates
+
+**Status:** 🟦 In Progress → ✅ Done
+
+### Changes
+
+- `README.md`: added persistence migration/integration workflow and command references.
+- `packages/control-api/README.md`: updated persistence mode and migration/testing command documentation.
+- `packages/worker/README.md`: documented in-memory vs postgres approval controller modes.
+- `packages/web/README.md`: documented API-backed session-store behavior and expectations.
+- `docs/persistence/CONTRIBUTING.md`: added contribution guidelines for schema/migration/testing discipline.
+- `docs/persistence/WBS.md`: updated documentation status rows and completion summaries.
+
+### Tests Added/Updated
+
+- None (documentation-only task).
+
+### Commands Run
+
+- `npm run typecheck && npm run lint && npm test && npm run build` → succeeded across all packages.
+
+### Notes
+
+- Remaining rollout hardening tasks (load/failover) remain tracked under WBS 9.3.2–9.3.4.
+
+### Completion Summary
+
+- Updated root and package documentation to reflect actual persistence implementation and commands.
+- Added contribution guidelines for safe persistence-layer evolution.
+- Linked developer workflow to integration test setup and migration operations.

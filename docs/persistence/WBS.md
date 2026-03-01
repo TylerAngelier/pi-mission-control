@@ -168,19 +168,19 @@
   - 8.3.3 Test full flow: API enqueue → worker execute → PostgreSQL events ⬜
   - 8.3.4 Add approval flow integration tests ⬜
 
-### 9. Documentation and Rollout ⬜
+### 9. Documentation and Rollout 🟦 In Progress
 
-- **9.1 Create operational documentation ⬜**
-  - 9.1.1 Write docs/persistence/OPERATIONS.md for PostgreSQL setup ⬜
-  - 9.1.2 Create docs/persistence/TROUBLESHOOTING.md for common issues ⬜
-  - 9.1.3 Document backup/restore procedures ⬜
-- **9.2 Create developer documentation ⬜**
-  - 9.2.1 Update package READMEs with persistence info ⬜
-  - 9.2.2 Add environment variable reference ⬜
-  - 9.2.3 Document local development workflow ⬜
-  - 9.2.4 Create contribution guidelines for persistence layer ⬜
-- **9.3 Implementation validation and smoke testing ⬜**
-  - 9.3.1 Run full test suite with persistence enabled ⬜
+- **9.1 Create operational documentation ✅**
+  - 9.1.1 Write docs/persistence/OPERATIONS.md for PostgreSQL setup ✅
+  - 9.1.2 Create docs/persistence/TROUBLESHOOTING.md for common issues ✅
+  - 9.1.3 Document backup/restore procedures ✅
+- **9.2 Create developer documentation ✅**
+  - 9.2.1 Update package READMEs with persistence info ✅
+  - 9.2.2 Add environment variable reference ✅
+  - 9.2.3 Document local development workflow ✅
+  - 9.2.4 Create contribution guidelines for persistence layer ✅
+- **9.3 Implementation validation and smoke testing 🟦 In Progress**
+  - 9.3.1 Run full test suite with persistence enabled ✅
   - 9.3.2 Perform load testing for event ingestion ⬜
   - 9.3.3 Validate PostgreSQL NOTIFY/LISTEN under load ⬜
   - 9.3.4 Test failover scenarios ⬜
@@ -256,4 +256,12 @@
 - 6.3.2: Added local test DB setup script (`packages/control-api/src/scripts/test-db.ts setup`).
 - 6.3.3: Added local test DB teardown script (`packages/control-api/src/scripts/test-db.ts teardown`).
 - 6.3.4: Added `docker-compose.test.yml` for isolated PostgreSQL integration-test infrastructure.
+- 9.1.1: Added and versioned `docs/persistence/OPERATIONS.md` with postgres setup + runbook guidance.
+- 9.1.2: Added and versioned `docs/persistence/TROUBLESHOOTING.md` for common failure scenarios.
+- 9.1.3: Documented backup/restore procedures in persistence operations documentation.
+- 9.2.1: Updated root and package READMEs with persistence features and commands.
+- 9.2.2: Added persistence environment variable references in `.env.example` and docs.
+- 9.2.3: Documented local dev + integration workflow in README command sections.
+- 9.2.4: Added `docs/persistence/CONTRIBUTING.md` with persistence-layer contribution rules.
+- 9.3.1: Repeatedly validated full workspace quality gates (`typecheck`, `lint`, `test`, `build`) with persistence changes.
 
