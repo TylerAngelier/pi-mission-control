@@ -62,3 +62,39 @@ This execution log tracks the implementation of the persistence layer migration 
 - Added durable idempotency behavior for enqueue message requests.
 - Added integration test scaffolding and root/package scripts for migrations and integration tests.
 - Revalidated build, test, lint, and typecheck for the full monorepo.
+
+## 5.x PostgreSQL-based distributed approval controller
+
+**Status:** 🟦 In Progress → ✅ Done
+
+### Changes
+
+- `packages/worker/src/approval.ts`: added `PostgresApprovalController` with LISTEN + polling decision retrieval, timeout handling, and approve/reject mutation helpers.
+- `packages/worker/src/approval.ts`: added `createApprovalControllerFromEnv()` for `PERSISTENCE_MODE`-based selection.
+- `packages/worker/src/index.ts`: exported postgres approval controller types and factory.
+- `packages/worker/package.json`: added `pg` + `@types/pg` for postgres-backed worker controller support.
+- `packages/control-api/src/persistence/migrations/002_add_indexes.sql`: added `approval_decided` NOTIFY trigger on approval state updates.
+- `packages/worker/src/index.test.ts`: added factory default behavior coverage.
+- `docs/persistence/WBS.md`: marked approval-controller tasks complete and added summaries.
+
+### Tests Added/Updated
+
+- `packages/worker/src/index.test.ts`: added `createApprovalControllerFromEnv` default-mode coverage.
+
+### Commands Run
+
+- `npm install` → succeeded.
+- `npm run typecheck --workspace @pi-mission-control/worker && npm run lint --workspace @pi-mission-control/worker && npm test --workspace @pi-mission-control/worker` → succeeded.
+- `npm run typecheck && npm run lint && npm test && npm run build` → succeeded across all packages.
+
+### Notes
+
+- Controller expects `approvals` table and `approval_decided` notifications from persistence migrations.
+- Timeout behavior remains driven by worker-side timer; DB polling is fallback for missed notifications.
+
+### Completion Summary
+
+- Added distributed worker approval decision handling over PostgreSQL.
+- Introduced env-based approval controller selection while preserving in-memory defaults.
+- Added NOTIFY trigger support for approval state changes.
+- Maintained backward compatibility with existing worker execution engine interfaces.

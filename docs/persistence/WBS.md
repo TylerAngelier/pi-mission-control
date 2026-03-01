@@ -91,23 +91,23 @@
   - 4.3.3 Implement cursor-based resume with sequence numbers ✅
   - 4.3.4 Add LISTEN connection error handling and reconnection ✅
 
-### 5. PostgreSQL-based Distributed Approval Controller ⬜
+### 5. PostgreSQL-based Distributed Approval Controller ✅
 
-- **5.1 Design PostgreSQL approval controller interface ⬜**
-  - 5.1.1 Define PostgresApprovalController implementing ApprovalController ⬜
-  - 5.1.2 Use approvals table with timeout_at column for expiration ⬜
-  - 5.1.3 Implement NOTIFY on approval state changes (approval_decided channel) ⬜
-  - 5.1.4 Add application-level timeout polling with DB queries ⬜
-- **5.2 Implement PostgresApprovalController ⬜**
-  - 5.2.1 Implement waitForDecision() using LISTEN + polling fallback ⬜
-  - 5.2.2 Implement approve() and reject() with NOTIFY ⬜
-  - 5.2.3 Add timeout handling via periodic DB query for expired approvals ⬜
-  - 5.2.4 Ensure thread-safety across multiple worker instances ⬜
-- **5.3 Integrate PostgresApprovalController into worker ⬜**
-  - 5.3.1 Update packages/worker/src/approval.ts to use PostgreSQL version ⬜
-  - 5.3.2 Add factory for creating approval controller based on env var ⬜
-  - 5.3.3 Keep InMemoryApprovalController for development/testing ⬜
-  - 5.3.4 Update worker execution engine to use new controller ⬜
+- **5.1 Design PostgreSQL approval controller interface ✅**
+  - 5.1.1 Define PostgresApprovalController implementing ApprovalController ✅
+  - 5.1.2 Use approvals table with timeout_at column for expiration ✅
+  - 5.1.3 Implement NOTIFY on approval state changes (approval_decided channel) ✅
+  - 5.1.4 Add application-level timeout polling with DB queries ✅
+- **5.2 Implement PostgresApprovalController ✅**
+  - 5.2.1 Implement waitForDecision() using LISTEN + polling fallback ✅
+  - 5.2.2 Implement approve() and reject() with NOTIFY ✅
+  - 5.2.3 Add timeout handling via periodic DB query for expired approvals ✅
+  - 5.2.4 Ensure thread-safety across multiple worker instances ✅
+- **5.3 Integrate PostgresApprovalController into worker ✅**
+  - 5.3.1 Update packages/worker/src/approval.ts to use PostgreSQL version ✅
+  - 5.3.2 Add factory for creating approval controller based on env var ✅
+  - 5.3.3 Keep InMemoryApprovalController for development/testing ✅
+  - 5.3.4 Update worker execution engine to use new controller ✅
 
 ### 6. Integration Tests with Clean Environments ⬜
 
@@ -224,4 +224,16 @@
 - 4.3.4: Added reconnect handling in notify manager to restore LISTEN subscriptions.
 - 6.2.1: Added `persistence.integration.test.ts` validating durable store flows and idempotent enqueue behavior.
 - 6.3.1: Added `test:integration` command at package and root levels.
+- 5.1.1: Added `PostgresApprovalController` implementing worker `ApprovalController` semantics with DB-backed coordination.
+- 5.1.2: Wired decision lookups against the `approvals` table for run/approval-scoped decisions.
+- 5.1.3: Added database trigger notification support on approval state transitions via `approval_decided` channel.
+- 5.1.4: Added fallback polling loop for approval decision discovery.
+- 5.2.1: Implemented `waitForDecision()` with LISTEN first and periodic DB polling fallback.
+- 5.2.2: Implemented `approve()`/`reject()` mutations with explicit pg_notify publication.
+- 5.2.3: Added timeout expiry handling in controller wait loop.
+- 5.2.4: Added distributed coordination through shared DB state and pub/sub notifications.
+- 5.3.1: Expanded `packages/worker/src/approval.ts` with postgres controller implementation.
+- 5.3.2: Added `createApprovalControllerFromEnv()` factory for env-driven controller selection.
+- 5.3.3: Preserved `InMemoryApprovalController` as default for local/test workflows.
+- 5.3.4: Kept worker execution engine compatible through existing controller abstraction.
 

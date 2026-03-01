@@ -26,3 +26,31 @@ CREATE TRIGGER trg_notify_run_event_insert
 AFTER INSERT ON run_events
 FOR EACH ROW
 EXECUTE FUNCTION notify_run_event_insert();
+
+CREATE OR REPLACE FUNCTION notify_approval_decided() RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.state IN ('approved', 'rejected', 'expired') THEN
+    PERFORM pg_notify(
+      'approval_decided',
+      json_build_object(
+        'runId', NEW.run_id,
+        'approvalId', NEW.id,
+        'state', NEW.state,
+        'actorId', NEW.actor_id,
+        'reason', NEW.reason,
+        'decidedAt', NEW.decided_at
+      )::text
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_notify_approval_decided ON approvals;
+
+CREATE TRIGGER trg_notify_approval_decided
+AFTER UPDATE OF state ON approvals
+FOR EACH ROW
+WHEN (OLD.state IS DISTINCT FROM NEW.state)
+EXECUTE FUNCTION notify_approval_decided();
