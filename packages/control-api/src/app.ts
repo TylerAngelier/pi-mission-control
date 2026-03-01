@@ -87,7 +87,63 @@ export const createControlApiApp = (options: AppOptions = {}): express.Express =
     res.status(200).json({ items: await store.listSessions(status) });
   });
 
+  app.get("/v1/sessions/list", async (req, res) => {
+    const rawStatus = typeof req.query.status === "string" ? req.query.status : undefined;
+    if (rawStatus && !sessionStatuses.includes(rawStatus as SessionStatus)) {
+      res.status(400).json({ code: "invalid_request", message: "Unsupported session status" });
+      return;
+    }
+
+    const status = rawStatus as SessionStatus | undefined;
+    const workspaceId = typeof req.query.workspaceId === "string" ? req.query.workspaceId : undefined;
+    const agentId = typeof req.query.agentId === "string" ? req.query.agentId : undefined;
+
+    const sessions = await store.listSessions(status);
+    const items = sessions.filter((session) => {
+      if (workspaceId && session.workspaceId !== workspaceId) {
+        return false;
+      }
+
+      if (agentId && session.agentId !== agentId) {
+        return false;
+      }
+
+      return true;
+    });
+
+    res.status(200).json({ items });
+  });
+
+  app.get("/v1/ui/sessions", async (req, res) => {
+    const rawStatus = typeof req.query.status === "string" ? req.query.status : undefined;
+    if (rawStatus && !sessionStatuses.includes(rawStatus as SessionStatus)) {
+      res.status(400).json({ code: "invalid_request", message: "Unsupported session status" });
+      return;
+    }
+
+    const sessions = await store.listSessions(rawStatus as SessionStatus | undefined);
+    const items = sessions.map((session) => ({
+      id: session.id,
+      title: session.title,
+      status: session.status,
+      updatedAt: session.updatedAt,
+    }));
+
+    res.status(200).json({ items });
+  });
+
   app.post("/v1/sessions", withZodValidation(createSessionSchema), async (req, res) => {
+    const agent = await store.getAgent(req.body.agentId);
+    if (!agent) {
+      res.status(404).json({ code: "not_found", message: "Agent not found" });
+      return;
+    }
+
+    const session = await store.createSession(req.body);
+    res.status(201).json(session);
+  });
+
+  app.post("/v1/ui/sessions", withZodValidation(createSessionSchema), async (req, res) => {
     const agent = await store.getAgent(req.body.agentId);
     if (!agent) {
       res.status(404).json({ code: "not_found", message: "Agent not found" });
@@ -111,6 +167,64 @@ export const createControlApiApp = (options: AppOptions = {}): express.Express =
     }
 
     res.status(200).json(session);
+  });
+
+  app.get("/v1/sessions/:sessionId/subscribe", async (req, res) => {
+    const sessionId = getPathParam(req, res, "sessionId");
+    if (!sessionId) {
+      return;
+    }
+
+    const session = await store.getSession(sessionId);
+    if (!session) {
+      res.status(404).json({ code: "not_found", message: "Session not found" });
+      return;
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders();
+
+    let lastUpdatedAt = session.updatedAt;
+
+    const writeSession = (nextSession: typeof session) => {
+      res.write("event: session_update\n");
+      res.write(
+        `data: ${JSON.stringify({
+          id: nextSession.id,
+          title: nextSession.title,
+          status: nextSession.status,
+          updatedAt: nextSession.updatedAt,
+        })}\n\n`
+      );
+    };
+
+    writeSession(session);
+
+    const pollInterval = setInterval(async () => {
+      const next = await store.getSession(sessionId);
+      if (!next) {
+        return;
+      }
+
+      if (next.updatedAt === lastUpdatedAt) {
+        return;
+      }
+
+      lastUpdatedAt = next.updatedAt;
+      writeSession(next);
+    }, 2_000);
+
+    const heartbeatInterval = setInterval(() => {
+      res.write(": keep-alive\n\n");
+    }, 15_000);
+
+    req.on("close", () => {
+      clearInterval(pollInterval);
+      clearInterval(heartbeatInterval);
+      res.end();
+    });
   });
 
   app.post(

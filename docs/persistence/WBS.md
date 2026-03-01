@@ -127,28 +127,28 @@
   - 6.3.3 Add test:teardown-db script for cleanup ⬜
   - 6.3.4 Create docker-compose.test.yml for isolated test environment ⬜
 
-### 7. Migrate Web UI Session Store ⬜
+### 7. Migrate Web UI Session Store 🟦 In Progress
 
-- **7.1 Design session store API migration ⬜**
-  - 7.1.1 Create new API endpoints: GET/POST /v1/ui/sessions ⬜
-  - 7.1.2 Define session summary schema for UI consumption ⬜
-  - 7.1.3 Add WebSocket/SSE endpoint for real-time session updates ⬜
-  - 7.1.4 Design backward compatibility layer for existing UI ⬜
-- **7.2 Implement session store API endpoints ⬜**
-  - 7.2.1 Add /v1/sessions/list with filters (status, workspace, agent) ⬜
-  - 7.2.2 Add /v1/sessions/:id/subscribe for real-time updates ⬜
-  - 7.2.3 Implement server-sent events for session state changes ⬜
-  - 7.2.4 Add session metadata endpoint for UI needs ⬜
-- **7.3 Replace web package in-memory session store ⬜**
-  - 7.3.1 Update packages/web/src/session-store.ts to fetch from API ⬜
-  - 7.3.2 Implement caching layer to reduce API calls ⬜
-  - 7.3.3 Add reconnection logic for real-time updates ⬜
-  - 7.3.4 Ensure offline capability via local cache ⬜
-- **7.4 Update web package tests ⬜**
-  - 7.4.1 Mock API responses for session store tests ⬜
+- **7.1 Design session store API migration ✅**
+  - 7.1.1 Create new API endpoints: GET/POST /v1/ui/sessions ✅
+  - 7.1.2 Define session summary schema for UI consumption ✅
+  - 7.1.3 Add WebSocket/SSE endpoint for real-time session updates ✅
+  - 7.1.4 Design backward compatibility layer for existing UI ✅
+- **7.2 Implement session store API endpoints ✅**
+  - 7.2.1 Add /v1/sessions/list with filters (status, workspace, agent) ✅
+  - 7.2.2 Add /v1/sessions/:id/subscribe for real-time updates ✅
+  - 7.2.3 Implement server-sent events for session state changes ✅
+  - 7.2.4 Add session metadata endpoint for UI needs ✅
+- **7.3 Replace web package in-memory session store ✅**
+  - 7.3.1 Update packages/web/src/session-store.ts to fetch from API ✅
+  - 7.3.2 Implement caching layer to reduce API calls ✅
+  - 7.3.3 Add reconnection logic for real-time updates ✅
+  - 7.3.4 Ensure offline capability via local cache ✅
+- **7.4 Update web package tests 🟦 In Progress**
+  - 7.4.1 Mock API responses for session store tests ✅
   - 7.4.2 Add integration tests with real API backend ⬜
   - 7.4.3 Test reconnection and error handling ⬜
-  - 7.4.4 Verify all web package tests pass ⬜
+  - 7.4.4 Verify all web package tests pass ✅
 
 ### 8. Update All Test Suites ⬜
 
@@ -236,4 +236,18 @@
 - 5.3.2: Added `createApprovalControllerFromEnv()` factory for env-driven controller selection.
 - 5.3.3: Preserved `InMemoryApprovalController` as default for local/test workflows.
 - 5.3.4: Kept worker execution engine compatible through existing controller abstraction.
+- 7.1.1: Added `/v1/ui/sessions` GET/POST endpoints for UI-oriented session list/create workflows.
+- 7.1.2: Standardized UI session summary shape (`id`, `title`, `status`, `updatedAt`).
+- 7.1.3: Added `/v1/sessions/:sessionId/subscribe` SSE endpoint emitting `session_update` events.
+- 7.1.4: Kept backward-compatible in-memory session-store behavior when API mode is not configured.
+- 7.2.1: Added `/v1/sessions/list` endpoint with status/workspace/agent filtering.
+- 7.2.2: Added session-specific subscribe endpoint for live UI updates.
+- 7.2.3: Implemented SSE stream with initial payload + heartbeat + polling-based change detection.
+- 7.2.4: Added UI-focused metadata endpoint via `/v1/ui/sessions` summaries.
+- 7.3.1: Upgraded `packages/web/src/session-store.ts` with remote API refresh support.
+- 7.3.2: Added TTL caching and storage-backed cache persistence.
+- 7.3.3: Added auto-reconnect behavior for session SSE subscriptions.
+- 7.3.4: Added offline fallback to local cached session snapshots when API refresh fails.
+- 7.4.1: Added mocked fetch and mocked event-source session store tests.
+- 7.4.4: Revalidated web package and workspace tests after session-store migration.
 

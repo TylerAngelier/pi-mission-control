@@ -98,3 +98,39 @@ This execution log tracks the implementation of the persistence layer migration 
 - Introduced env-based approval controller selection while preserving in-memory defaults.
 - Added NOTIFY trigger support for approval state changes.
 - Maintained backward compatibility with existing worker execution engine interfaces.
+
+## 7.x Session-store API migration and web store replacement
+
+**Status:** 🟦 In Progress → 🟦 In Progress
+
+### Changes
+
+- `packages/control-api/src/app.ts`: added `/v1/ui/sessions` GET/POST endpoints, `/v1/sessions/list`, and `/v1/sessions/:sessionId/subscribe` SSE route.
+- `packages/control-api/src/index.test.ts`: added integration coverage for new UI session list/filter/subscribe routes.
+- `packages/web/src/session-store.ts`: migrated session store to support API refresh, TTL caching, storage persistence fallback, and SSE subscription reconnect.
+- `packages/web/src/session-store.test.ts`: added tests for API refresh caching and SSE update ingestion.
+- `docs/persistence/WBS.md`: updated section 7 statuses and per-task summaries.
+
+### Tests Added/Updated
+
+- `packages/control-api/src/index.test.ts`: added UI session endpoint + subscribe coverage.
+- `packages/web/src/session-store.test.ts`: added mocked fetch and mocked SSE listener coverage.
+
+### Commands Run
+
+- `npm run typecheck --workspace @pi-mission-control/web && npm run typecheck --workspace @pi-mission-control/control-api` → succeeded.
+- `npm run lint --workspace @pi-mission-control/web && npm test --workspace @pi-mission-control/web` → succeeded.
+- `npm run lint --workspace @pi-mission-control/control-api && npm test --workspace @pi-mission-control/control-api` → succeeded after assertion fix.
+- `npm run typecheck && npm run lint && npm test && npm run build` → succeeded across all packages.
+
+### Notes
+
+- Session subscription endpoint currently uses polling-backed SSE updates rather than DB-triggered push events.
+- Web session-store integration tests with a real API backend remain open (WBS 7.4.2).
+
+### Completion Summary
+
+- Added UI-facing control-api session endpoints needed for web session list and subscription.
+- Implemented API-backed web session store with cache TTL and offline fallback behavior.
+- Added SSE subscription client logic with reconnect support in the web store.
+- Extended test coverage for new API/session-store behavior and preserved full workspace green checks.
