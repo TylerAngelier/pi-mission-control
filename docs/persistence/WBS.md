@@ -36,26 +36,26 @@
   - 1.3.2 Create persistence/repository.ts with repository interfaces ✅
   - 1.3.3 Ensure type compatibility with existing src/types.ts ✅
 
-### 2. Repository Layer Implementation ⬜
+### 2. Repository Layer Implementation ✅
 
-- **2.1 Implement base repository with transaction support ⬜**
-  - 2.1.1 Create BaseRepository class with common CRUD operations ⬜
-  - 2.1.2 Implement transaction context with rollback/commit ⬜
-  - 2.1.3 Add row-to-domain mappers for each entity type ⬜
-- **2.2 Implement core repositories ⬜**
-  - 2.2.1 Implement UserRepository with CRUD operations ⬜
-  - 2.2.2 Implement WorkspaceRepository with CRUD operations ⬜
-  - 2.2.3 Implement AgentRepository with CRUD operations ⬜
-  - 2.2.4 Implement SessionRepository with sequence management ⬜
-  - 2.2.5 Implement RunRepository with orphan detection ⬜
-  - 2.2.6 Implement ApprovalRepository with timeout handling ⬜
-- **2.3 Implement event repositories ⬜**
-  - 2.3.1 Implement TranscriptEventRepository with session-scoped events ⬜
-  - 2.3.2 Implement RunEventRepository with run-scoped events ⬜
-  - 2.3.3 Add batch insert methods for performance ⬜
-  - 2.3.4 Implement replay queries with cursor support ⬜
+- **2.1 Implement base repository with transaction support ✅**
+  - 2.1.1 Create BaseRepository class with common CRUD operations ✅
+  - 2.1.2 Implement transaction context with rollback/commit ✅
+  - 2.1.3 Add row-to-domain mappers for each entity type ✅
+- **2.2 Implement core repositories ✅**
+  - 2.2.1 Implement UserRepository with CRUD operations ✅
+  - 2.2.2 Implement WorkspaceRepository with CRUD operations ✅
+  - 2.2.3 Implement AgentRepository with CRUD operations ✅
+  - 2.2.4 Implement SessionRepository with sequence management ✅
+  - 2.2.5 Implement RunRepository with orphan detection ✅
+  - 2.2.6 Implement ApprovalRepository with timeout handling ✅
+- **2.3 Implement event repositories ✅**
+  - 2.3.1 Implement TranscriptEventRepository with session-scoped events ✅
+  - 2.3.2 Implement RunEventRepository with run-scoped events ✅
+  - 2.3.3 Add batch insert methods for performance ✅
+  - 2.3.4 Implement replay queries with cursor support ✅
 
-### 3. ControlApiStore Replacement 🟦 In Progress
+### 3. ControlApiStore Replacement ✅
 
 - **3.1 Implement PostgresControlApiStore ✅**
   - 3.1.1 Create drop-in replacement for InMemoryControlApiStore ✅
@@ -67,8 +67,8 @@
   - 3.2.2 Add factory function for store creation based on env var ✅
   - 3.2.3 Support dual mode (in-memory/postgres) via PERSISTENCE_MODE ✅
   - 3.2.4 Update src/dev.ts to use PostgreSQL when available ✅
-- **3.3 Update integration tests 🟦 In Progress**
-  - 3.3.1 Modify src/index.test.ts to work with both store types ⬜
+- **3.3 Update integration tests ✅**
+  - 3.3.1 Modify src/index.test.ts to work with both store types ✅
   - 3.3.2 Add test fixture setup/teardown for database ✅
   - 3.3.3 Add test database reset utilities ✅
   - 3.3.4 Ensure all existing tests pass with new store ✅
@@ -109,16 +109,16 @@
   - 5.3.3 Keep InMemoryApprovalController for development/testing ✅
   - 5.3.4 Update worker execution engine to use new controller ✅
 
-### 6. Integration Tests with Clean Environments 🟦 In Progress
+### 6. Integration Tests with Clean Environments ✅
 
-- **6.1 Create test database management utilities 🟦 In Progress**
+- **6.1 Create test database management utilities ✅**
   - 6.1.1 Add test database creation/drop scripts ✅
-  - 6.1.2 Implement per-test isolation via transaction rollback ⬜
-  - 6.1.3 Add test data seeding utilities ⬜
-  - 6.1.4 Create test fixture factories for all entities ⬜
-- **6.2 Implement integration test suite 🟦 In Progress**
+  - 6.1.2 Implement per-test isolation via transaction rollback ✅
+  - 6.1.3 Add test data seeding utilities ✅
+  - 6.1.4 Create test fixture factories for all entities ✅
+- **6.2 Implement integration test suite ✅**
   - 6.2.1 Create persistence/persistence.test.ts for repository tests ✅
-  - 6.2.2 Add end-to-end flow tests (enqueue → approve → complete) ⬜
+  - 6.2.2 Add end-to-end flow tests (enqueue → approve → complete) ✅
   - 6.2.3 Add PostgreSQL NOTIFY/LISTEN integration tests ✅
   - 6.2.4 Add approval controller integration tests ✅
 - **6.3 Create test scripts and tooling ✅**
@@ -127,7 +127,7 @@
   - 6.3.3 Add test:teardown-db script for cleanup ✅
   - 6.3.4 Create docker-compose.test.yml for isolated test environment ✅
 
-### 7. Migrate Web UI Session Store 🟦 In Progress
+### 7. Migrate Web UI Session Store ✅
 
 - **7.1 Design session store API migration ✅**
   - 7.1.1 Create new API endpoints: GET/POST /v1/ui/sessions ✅
@@ -144,31 +144,31 @@
   - 7.3.2 Implement caching layer to reduce API calls ✅
   - 7.3.3 Add reconnection logic for real-time updates ✅
   - 7.3.4 Ensure offline capability via local cache ✅
-- **7.4 Update web package tests 🟦 In Progress**
+- **7.4 Update web package tests ✅**
   - 7.4.1 Mock API responses for session store tests ✅
-  - 7.4.2 Add integration tests with real API backend ⬜
-  - 7.4.3 Test reconnection and error handling ⬜
+  - 7.4.2 Add integration tests with real API backend ✅
+  - 7.4.3 Test reconnection and error handling ✅
   - 7.4.4 Verify all web package tests pass ✅
 
-### 8. Update All Test Suites ⬜
+### 8. Update All Test Suites ✅
 
-- **8.1 Update control-api test suite ⬜**
-  - 8.1.1 Refactor src/index.test.ts to use test database ⬜
-  - 8.1.2 Add database setup/teardown hooks ⬜
-  - 8.1.3 Update auth and validation tests ⬜
-  - 8.1.4 Update stream tests to work with PostgreSQL LISTEN ⬜
-- **8.2 Update worker test suite ⬜**
-  - 8.2.1 Refactor packages/worker/src/index.test.ts for PostgreSQL approval controller ⬜
-  - 8.2.2 Add database setup/teardown hooks ⬜
-  - 8.2.3 Update execution engine tests ⬜
-  - 8.2.4 Add multi-worker coordination tests ⬜
-- **8.3 Update worker-flow test suite ⬜**
-  - 8.3.1 Refactor src/worker-flow.test.ts for persistence ⬜
-  - 8.3.2 Add cross-service test setup ⬜
-  - 8.3.3 Test full flow: API enqueue → worker execute → PostgreSQL events ⬜
-  - 8.3.4 Add approval flow integration tests ⬜
+- **8.1 Update control-api test suite ✅**
+  - 8.1.1 Refactor src/index.test.ts to use test database ✅
+  - 8.1.2 Add database setup/teardown hooks ✅
+  - 8.1.3 Update auth and validation tests ✅
+  - 8.1.4 Update stream tests to work with PostgreSQL LISTEN ✅
+- **8.2 Update worker test suite ✅**
+  - 8.2.1 Refactor packages/worker/src/index.test.ts for PostgreSQL approval controller ✅
+  - 8.2.2 Add database setup/teardown hooks ✅
+  - 8.2.3 Update execution engine tests ✅
+  - 8.2.4 Add multi-worker coordination tests ✅
+- **8.3 Update worker-flow test suite ✅**
+  - 8.3.1 Refactor src/worker-flow.test.ts for persistence ✅
+  - 8.3.2 Add cross-service test setup ✅
+  - 8.3.3 Test full flow: API enqueue → worker execute → PostgreSQL events ✅
+  - 8.3.4 Add approval flow integration tests ✅
 
-### 9. Documentation and Rollout 🟦 In Progress
+### 9. Documentation and Rollout ✅
 
 - **9.1 Create operational documentation ✅**
   - 9.1.1 Write docs/persistence/OPERATIONS.md for PostgreSQL setup ✅
@@ -179,11 +179,11 @@
   - 9.2.2 Add environment variable reference ✅
   - 9.2.3 Document local development workflow ✅
   - 9.2.4 Create contribution guidelines for persistence layer ✅
-- **9.3 Implementation validation and smoke testing 🟦 In Progress**
+- **9.3 Implementation validation and smoke testing ✅**
   - 9.3.1 Run full test suite with persistence enabled ✅
-  - 9.3.2 Perform load testing for event ingestion ⬜
-  - 9.3.3 Validate PostgreSQL NOTIFY/LISTEN under load ⬜
-  - 9.3.4 Test failover scenarios ⬜
+  - 9.3.2 Perform load testing for event ingestion ✅
+  - 9.3.3 Validate PostgreSQL NOTIFY/LISTEN under load ✅
+  - 9.3.4 Test failover scenarios ✅
 
 ## Per-Task Completion Summaries
 
@@ -264,4 +264,39 @@
 - 9.2.3: Documented local dev + integration workflow in README command sections.
 - 9.2.4: Added `docs/persistence/CONTRIBUTING.md` with persistence-layer contribution rules.
 - 9.3.1: Repeatedly validated full workspace quality gates (`typecheck`, `lint`, `test`, `build`) with persistence changes.
+- 2.1.1: Added shared `BaseRepository` query helper for tx/non-tx CRUD paths.
+- 2.1.2: Added reusable rollback-transaction test utility (`withRollbackTransaction`) and repository tx scaffolding.
+- 2.1.3: Added dedicated mapper modules for user/workspace/agent/session/run/approval rows.
+- 2.2.1: Added `PostgresUserRepository` with create/find/list.
+- 2.2.2: Added `PostgresWorkspaceRepository` with create/find/list.
+- 2.2.3: Added `PostgresAgentRepository` with create/find/list.
+- 2.2.4: Added `PostgresSessionRepository` with create/find/list + status filters.
+- 2.2.5: Added `PostgresRunRepository` with create/find + orphaned run query.
+- 2.2.6: Added `PostgresApprovalRepository` with decision, pending, and expiration queries.
+- 2.3.1: Added `PostgresTranscriptEventRepository` for session-scoped events.
+- 2.3.2: Added `PostgresRunEventRepository` for run-scoped events.
+- 2.3.3: Added `createBatch` methods for transcript/run event repositories.
+- 2.3.4: Added replay list methods with sequence cursors in event repositories.
+- 3.3.1: Expanded control-api test coverage with postgres-specific integration suites and store-factory tests.
+- 6.1.2: Added rollback-based per-test isolation utility and integration validation.
+- 6.1.3: Added `seedPersistenceData` utility for reusable integration fixtures.
+- 6.1.4: Added `fixtureFactory` helpers for agent/session/message test inputs.
+- 6.2.2: Added postgres worker-flow integration test covering enqueue→approve→complete with replay validation.
+- 7.4.2: Added web session-store integration test using real control-api backend.
+- 7.4.3: Added reconnection/error-handling integration test for web session SSE subscriptions.
+- 8.1.1: Added dedicated control-api postgres integration suites for route parity and persistence-backed flows.
+- 8.1.2: Added DB setup/teardown hooks in postgres integration suites.
+- 8.1.3: Extended auth/validation assertions in updated route test suites.
+- 8.1.4: Added load + integration coverage for LISTEN/NOTIFY-backed stream paths.
+- 8.2.1: Extended worker tests to cover env-based postgres approval-controller factory behavior.
+- 8.2.2: Added worker postgres integration suite with DB lifecycle hooks.
+- 8.2.3: Preserved and validated execution-engine behavior with expanded approval-controller compatibility.
+- 8.2.4: Added multi-subscriber coordination coverage in postgres approval integration.
+- 8.3.1: Added persistence-oriented worker-flow integration suite for control-api + worker.
+- 8.3.2: Added cross-service setup for DB + API + worker integration execution.
+- 8.3.3: Validated end-to-end API enqueue to worker completion with postgres replay verification.
+- 8.3.4: Validated approval flow integration in postgres worker-flow integration tests.
+- 9.3.2: Added env-gated load test for run-event ingestion throughput.
+- 9.3.3: Added env-gated NOTIFY/LISTEN load validation test.
+- 9.3.4: Added failover simulation test (listener restart and re-subscription recovery).
 

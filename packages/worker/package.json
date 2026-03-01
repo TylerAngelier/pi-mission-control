@@ -11,6 +11,7 @@
     "dev": "tsx --env-file=../../.env src/dev.ts",
     "test": "vitest run --config vitest.config.ts",
     "test:coverage": "vitest run --config vitest.config.ts --coverage",
+    "test:integration": "vitest run --config vitest.config.ts src/**/*.integration.test.ts",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {

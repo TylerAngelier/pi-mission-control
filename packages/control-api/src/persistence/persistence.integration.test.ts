@@ -10,6 +10,7 @@ import { MigrationRunner } from "./migrations/runner.js";
 import { PostgresNotifyManager } from "./notify.js";
 import { PostgresControlApiStore } from "./control-api-store.js";
 import { PostgresControlApiRepository } from "./repositories/control-api.repository.js";
+import { seedPersistenceData, withRollbackTransaction } from "./test-utils.js";
 
 const databaseUrl = process.env.MISSION_CONTROL_TEST_DATABASE_URL;
 const runIntegration = Boolean(databaseUrl);
@@ -45,6 +46,27 @@ describe.skipIf(!runIntegration)("postgres persistence integration", () => {
     await db.close();
   });
 
+  it("supports rollback-isolated test transactions", async () => {
+    await withRollbackTransaction(db, async (client) => {
+      await client.query(
+        `INSERT INTO users (id, email, display_name) VALUES ($1, $2, $3)`,
+        ["user_tx", "user_tx@example.com", "Rollback User"]
+      );
+
+      const rows = await client.query<{ count: string }>(
+        `SELECT COUNT(*)::text AS count FROM users WHERE id = 'user_tx'`
+      );
+
+      expect(Number(rows.rows[0]?.count ?? "0")).toBe(1);
+    });
+
+    const persisted = await db.query<{ count: string }>(
+      `SELECT COUNT(*)::text AS count FROM users WHERE id = 'user_tx'`
+    );
+
+    expect(Number(persisted.rows[0]?.count ?? "0")).toBe(0);
+  });
+
   it("publishes and receives postgres notifications", async () => {
     const received: string[] = [];
 
@@ -61,22 +83,14 @@ describe.skipIf(!runIntegration)("postgres persistence integration", () => {
   });
 
   it("persists entities, idempotency keys, replay, and transcript data", async () => {
-    const createAgent = await request(app)
-      .post("/v1/agents")
-      .set(authHeader)
-      .send({
-        name: "postgres-agent",
-        model: "anthropic/claude-sonnet-4-5-20250929",
-      });
-
-    expect(createAgent.status).toBe(201);
+    const { agentId, workspaceId } = await seedPersistenceData(db);
 
     const createSession = await request(app)
       .post("/v1/sessions")
       .set(authHeader)
       .send({
-        agentId: createAgent.body.id,
-        workspaceId: "workspace_pg",
+        agentId,
+        workspaceId,
         title: "Postgres Session",
       });
 

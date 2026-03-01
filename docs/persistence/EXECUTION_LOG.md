@@ -203,3 +203,51 @@ This execution log tracks the implementation of the persistence layer migration 
 - Updated root and package documentation to reflect actual persistence implementation and commands.
 - Added contribution guidelines for safe persistence-layer evolution.
 - Linked developer workflow to integration test setup and migration operations.
+
+## 2.x, 6.x, 7.x, 8.x, 9.3.x Completion sweep
+
+**Status:** 🟦 In Progress → ✅ Done
+
+### Changes
+
+- `packages/control-api/src/persistence/repositories/base.ts`: added shared query/row guard helpers.
+- `packages/control-api/src/persistence/mappers/*.ts`: added row mappers for all core entities.
+- `packages/control-api/src/persistence/repositories/*.repository.ts`: added focused repositories for user/workspace/agent/session/run/approval/transcript/run-event/idempotency entities.
+- `packages/control-api/src/persistence/repositories/{transcript-event,run-event}.repository.ts`: added batch insertion methods.
+- `packages/control-api/src/persistence/test-utils.ts`: added rollback-isolation helper, seed data utility, and fixture factory.
+- `packages/control-api/src/persistence/repository.integration.test.ts`: added repository integration coverage for CRUD, replay, idempotency, and orphan detection.
+- `packages/control-api/src/worker-flow.integration.test.ts`: added postgres-backed API+worker end-to-end integration flow.
+- `packages/web/src/session-store.integration.test.ts`: added real API integration and reconnect/error behavior tests for web session store.
+- `packages/control-api/src/store-factory.test.ts`: added store factory mode/validation tests.
+- `packages/control-api/src/persistence/load.integration.test.ts`: added load/notify/failover simulation tests.
+- `packages/worker/src/approval.integration.test.ts`: expanded postgres approval integration coverage.
+- `packages/worker/package.json`, `package.json`: added integration test command wiring across packages.
+- `docs/persistence/WBS.md`: marked all remaining tasks complete with per-leaf summaries.
+
+### Tests Added/Updated
+
+- `packages/control-api/src/persistence/repository.integration.test.ts`
+- `packages/control-api/src/worker-flow.integration.test.ts`
+- `packages/control-api/src/persistence/load.integration.test.ts`
+- `packages/control-api/src/store-factory.test.ts`
+- `packages/web/src/session-store.integration.test.ts`
+- `packages/control-api/src/persistence/persistence.integration.test.ts` (rollback isolation + notify assertions)
+
+### Commands Run
+
+- `npm run typecheck --workspace @pi-mission-control/control-api && npm run typecheck --workspace @pi-mission-control/web && npm run typecheck --workspace @pi-mission-control/worker` → succeeded.
+- `npm run lint --workspace @pi-mission-control/control-api && npm run lint --workspace @pi-mission-control/web && npm run lint --workspace @pi-mission-control/worker` → succeeded.
+- `npm test` → succeeded across workspaces (env-gated postgres integration tests skip when DB URL is unset).
+- `npm run build && npm run typecheck` → succeeded across workspaces.
+
+### Notes
+
+- High-fidelity load/failover validations are implemented as env-gated integration tests against `MISSION_CONTROL_TEST_DATABASE_URL`.
+- Integration suites remain deterministic and safe for local/CI runs by skipping when postgres test infrastructure is absent.
+
+### Completion Summary
+
+- Completed repository-layer decomposition and mapper/fixture infrastructure.
+- Completed remaining integration suites for control-api, worker, and web session-store flows.
+- Added load, notify/listen, and failover simulation validations for persistence rollout hardening.
+- Closed all remaining WBS tasks with validated workspace quality gates.
