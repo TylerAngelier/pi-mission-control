@@ -1,9 +1,18 @@
+import { startControlApiServer } from "./index.js";
+
 const port = Number(process.env.MISSION_CONTROL_PORT ?? 8787);
-const apiBaseUrl = process.env.MISSION_CONTROL_API_BASE_URL ?? `http://localhost:${port}`;
+const authToken = process.env.MISSION_CONTROL_API_TOKEN ?? "dev-token";
 
-console.log(`[control-api] dev placeholder started on ${apiBaseUrl}`);
-console.log("[control-api] waiting for control plane implementation...");
+const server = await startControlApiServer(port, { authToken });
 
-setInterval(() => {
-  console.log("[control-api] heartbeat");
-}, 30000);
+console.log(`[control-api] listening on http://localhost:${port}`);
+console.log("[control-api] protected routes require Authorization: Bearer <token>");
+
+const shutdown = () => {
+  server.close(() => {
+    process.exit(0);
+  });
+};
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);

@@ -16,6 +16,7 @@ Bootstrap scaffold with:
 
 - `src/index.ts` health helper
 - `src/dev.ts` placeholder dev process
+- `openapi/openapi.yaml` API contract for agents, sessions, runs, messages, and approvals
 - package-level lint/test/typecheck/build scripts
 
 ## Commands

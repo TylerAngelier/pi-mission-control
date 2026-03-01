@@ -284,3 +284,105 @@
 - Added onboarding documentation at both root and package levels.
 - Standardized how to run per-package commands from repo root.
 - Kept existing quality gates green after docs update.
+
+## 3.1.1 Define OpenAPI contracts for agents, sessions, messages, runs, approvals
+
+**Status:** 🟦 In Progress → ✅ Done
+
+### Changes
+
+- `packages/control-api/openapi/openapi.yaml`: added OpenAPI 3.1 contract for v1 control-plane resources and operations.
+- `packages/control-api/openapi/openapi.yaml`: defined schemas for `Agent`, `Session`, `Run`, transcript events, approval decisions, and error responses.
+- `packages/control-api/README.md`: documented location and scope of the OpenAPI contract.
+- `docs/tasks/TASKS.md`: marked `3.1.1` as complete and updated WBS roll-up status.
+
+### Tests Added/Updated
+
+- None (contract/documentation task; no runtime handler implementation yet).
+
+### Commands Run
+
+- `npm run lint && npm test && npm run typecheck` → all commands succeeded across workspace packages.
+
+### Notes
+
+- Assumption: contract-first implementation; handler behavior in `3.1.2` should conform to this spec.
+- Follow-up: add contract validation tests once handlers are implemented (`6.1.1`).
+
+### Completion Summary
+
+- Established canonical API contracts for control-plane operations.
+- Covered session message enqueue and transcript retrieval flows.
+- Added run approval/rejection endpoints with typed decision payloads.
+- Preserved green quality gates after introducing the spec.
+
+## 3.1.2 Implement REST handlers with auth, validation, and persistence
+
+**Status:** 🟦 In Progress → ✅ Done
+
+### Changes
+
+- `packages/control-api/src/app.ts`: implemented Express API routes for agents, sessions, message enqueue, transcript retrieval, run lookup, and approve/reject decisions.
+- `packages/control-api/src/app.ts`: added bearer-token auth middleware and request validation/error handling paths.
+- `packages/control-api/src/store.ts`: added in-memory persistence layer for agents/sessions/runs/approvals/transcript events.
+- `packages/control-api/src/validation.ts`: added Zod request schemas for create/decision endpoints.
+- `packages/control-api/src/types.ts`: added domain types for statuses, entities, and transcript events.
+- `packages/control-api/src/index.ts`: added server bootstrap helper (`startControlApiServer`) and app export.
+- `packages/control-api/src/dev.ts`: replaced placeholder heartbeat with actual HTTP server startup.
+- `packages/control-api/src/index.test.ts`: added integration tests for auth guard and enqueue→approve→run/transcript flow.
+- `packages/control-api/openapi/openapi.yaml`: updated `RunAcceptedResponse` to include `approvalId` and added bearer security scheme.
+- `packages/control-api/package.json`: added runtime and test dependencies for API implementation.
+- `docs/tasks/TASKS.md`: marked `3.1.2` complete and updated completion summary.
+
+### Tests Added/Updated
+
+- `packages/control-api/src/index.test.ts`: added protected-route auth test.
+- `packages/control-api/src/index.test.ts`: added end-to-end creation/enqueue/approve/transcript assertions.
+
+### Commands Run
+
+- `npm install` → succeeded; installed control-api API/test dependencies.
+- `npm run lint --workspace @pi-mission-control/control-api` → succeeded.
+- `npm test --workspace @pi-mission-control/control-api` → succeeded; 3 tests passed.
+- `npm run lint && npm test && npm run typecheck` → all workspace checks succeeded.
+
+### Notes
+
+- Persistence is currently process-local in-memory storage; database-backed repositories remain a follow-up for backend hardening tasks.
+- Auth currently uses a static bearer token from env (`MISSION_CONTROL_API_TOKEN`) suitable for local/dev bootstrap.
+
+### Completion Summary
+
+- Delivered first functional control-plane API surface aligned to the OpenAPI contract.
+- Implemented auth + validation + persistence requirements for task 3.1.2.
+- Added integration tests covering key happy-path and auth protection behavior.
+- Kept full workspace lint/test/typecheck gates green.
+
+## 2.3.2 Add explicit root README test instructions for workspace and per-package runs
+
+**Status:** 🟦 In Progress → ✅ Done
+
+### Changes
+
+- `README.md`: added a dedicated **Test Instructions** section.
+- `README.md`: documented full-workspace and package-scoped `npm test` commands.
+- `README.md`: documented recommended pre-commit verification order (`lint`, `test`, `typecheck`, `build`).
+- `docs/tasks/TASKS.md`: added and completed WBS leaf `2.3.2`.
+
+### Tests Added/Updated
+
+- None (documentation-only update).
+
+### Commands Run
+
+- `npm test` → succeeded across all workspace packages.
+
+### Notes
+
+- Instructions now reflect current scripts and package naming conventions.
+
+### Completion Summary
+
+- Added clear, actionable test workflow guidance at repo root.
+- Reduced onboarding ambiguity for full-suite vs package-only test runs.
+- Kept test gate green after documentation update.

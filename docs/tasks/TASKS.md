@@ -36,12 +36,13 @@
   - 2.2.2 Verify bootstrap build/test/lint commands and update Repo Commands section ✅
 - **2.3 Documentation Bootstrap ✅**
   - 2.3.1 Add README.md to root and each package (`control-api`, `worker`, `web`) ✅
+  - 2.3.2 Add explicit root README test instructions for workspace and per-package runs ✅
 
-### 3. Control Plane Backend ⬜
+### 3. Control Plane Backend 🟦
 
-- **3.1 Session/Run API Surface ⬜**
-  - 3.1.1 Define OpenAPI contracts for agents, sessions, messages, runs, approvals ⬜
-  - 3.1.2 Implement REST handlers with auth, validation, and persistence ⬜
+- **3.1 Session/Run API Surface ✅**
+  - 3.1.1 Define OpenAPI contracts for agents, sessions, messages, runs, approvals ✅
+  - 3.1.2 Implement REST handlers with auth, validation, and persistence ✅
 - **3.2 Realtime Event Stream ⬜**
   - 3.2.1 Implement stream gateway (WebSocket/SSE) with per-run sequence ordering ⬜
   - 3.2.2 Add reconnect cursor support (`lastSequence`) and replay endpoint ⬜
@@ -84,8 +85,9 @@
 - 2.2.1: Added Docker Compose services (Postgres/Redis), root orchestration scripts (`infra:up`, `infra:down`, `dev`), and placeholder `dev` entrypoints for API/worker packages.
 - 2.2.2: Verified `npm run build`, `npm test`, `npm run lint`, and `npm run typecheck`; updated Repo Commands with concrete validated commands.
 - 2.3.1: Added onboarding READMEs for repo root and all package workspaces with purpose, status, and command usage.
-- 3.1.1: _(empty until completed)_
-- 3.1.2: _(empty until completed)_
+- 2.3.2: Expanded root README with dedicated test instructions, package-scoped test commands, and recommended pre-commit verification order.
+- 3.1.1: Added `packages/control-api/openapi/openapi.yaml` with v1 contract definitions for agents, sessions, messages, runs, approvals, and transcript retrieval; validated repository lint/test/typecheck.
+- 3.1.2: Implemented Express-based REST handlers with bearer auth, Zod request validation, and in-memory persistence for agents/sessions/runs/approvals/transcripts; added integration tests for auth and end-to-end enqueue/approve flow.
 - 3.2.1: _(empty until completed)_
 - 3.2.2: _(empty until completed)_
 - 4.1.1: _(empty until completed)_

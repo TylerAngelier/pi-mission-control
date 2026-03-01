@@ -1,0 +1,502 @@
+openapi: 3.1.0
+info:
+  title: Pi Mission Control API
+  version: 0.1.0
+  summary: Control plane contracts for remote pi agent orchestration
+  description: |
+    OpenAPI contract for agent/session/run lifecycle and approval workflows
+    used by Pi Mission Control.
+
+servers:
+  - url: http://localhost:8787
+    description: Local development
+
+tags:
+  - name: Agents
+  - name: Sessions
+  - name: Runs
+  - name: Approvals
+
+security:
+  - bearerAuth: []
+
+paths:
+  /v1/agents:
+    get:
+      tags: [Agents]
+      summary: List agents
+      operationId: listAgents
+      responses:
+        "200":
+          description: Agents list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Agent"
+    post:
+      tags: [Agents]
+      summary: Create an agent profile
+      operationId: createAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAgentRequest"
+      responses:
+        "201":
+          description: Agent created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+
+  /v1/agents/{agentId}:
+    parameters:
+      - $ref: "#/components/parameters/AgentId"
+    get:
+      tags: [Agents]
+      summary: Get agent profile
+      operationId: getAgent
+      responses:
+        "200":
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sessions:
+    get:
+      tags: [Sessions]
+      summary: List sessions
+      operationId: listSessions
+      parameters:
+        - in: query
+          name: status
+          schema:
+            $ref: "#/components/schemas/SessionStatus"
+      responses:
+        "200":
+          description: Sessions list
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Session"
+    post:
+      tags: [Sessions]
+      summary: Create session
+      operationId: createSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionRequest"
+      responses:
+        "201":
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+
+  /v1/sessions/{sessionId}:
+    parameters:
+      - $ref: "#/components/parameters/SessionId"
+    get:
+      tags: [Sessions]
+      summary: Get session metadata
+      operationId: getSession
+      responses:
+        "200":
+          description: Session details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sessions/{sessionId}/messages:
+    parameters:
+      - $ref: "#/components/parameters/SessionId"
+    post:
+      tags: [Sessions]
+      summary: Enqueue a user message into a session
+      operationId: enqueueMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMessageRequest"
+      responses:
+        "202":
+          description: Message accepted and run queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunAcceptedResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sessions/{sessionId}/transcript:
+    parameters:
+      - $ref: "#/components/parameters/SessionId"
+      - in: query
+        name: fromSequence
+        schema:
+          type: integer
+          minimum: 1
+    get:
+      tags: [Sessions]
+      summary: Fetch persisted transcript events/messages
+      operationId: getSessionTranscript
+      responses:
+        "200":
+          description: Session transcript chunk
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TranscriptResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/runs/{runId}:
+    parameters:
+      - $ref: "#/components/parameters/RunId"
+    get:
+      tags: [Runs]
+      summary: Get run details
+      operationId: getRun
+      responses:
+        "200":
+          description: Run metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Run"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/runs/{runId}/approve:
+    parameters:
+      - $ref: "#/components/parameters/RunId"
+    post:
+      tags: [Approvals]
+      summary: Approve a gated action for a run
+      operationId: approveRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApprovalDecisionRequest"
+      responses:
+        "200":
+          description: Approval accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApprovalDecisionResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/runs/{runId}/reject:
+    parameters:
+      - $ref: "#/components/parameters/RunId"
+    post:
+      tags: [Approvals]
+      summary: Reject a gated action for a run
+      operationId: rejectRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApprovalDecisionRequest"
+      responses:
+        "200":
+          description: Rejection accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApprovalDecisionResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    AgentId:
+      in: path
+      name: agentId
+      required: true
+      schema:
+        type: string
+    SessionId:
+      in: path
+      name: sessionId
+      required: true
+      schema:
+        type: string
+    RunId:
+      in: path
+      name: runId
+      required: true
+      schema:
+        type: string
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+    Agent:
+      type: object
+      required:
+        [id, name, model, defaultTools, policyId, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          example: agent_01JABCDEF
+        name:
+          type: string
+          example: backend-maintainer
+        model:
+          type: string
+          example: anthropic/claude-sonnet-4-5-20250929
+        defaultTools:
+          type: array
+          items:
+            type: string
+          example: [read, bash, edit, write]
+        policyId:
+          type: string
+          example: policy_strict
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateAgentRequest:
+      type: object
+      required: [name, model]
+      properties:
+        name:
+          type: string
+        model:
+          type: string
+        defaultTools:
+          type: array
+          items:
+            type: string
+        policyId:
+          type: string
+
+    Session:
+      type: object
+      required:
+        [
+          id,
+          agentId,
+          workspaceId,
+          status,
+          title,
+          createdBy,
+          createdAt,
+          updatedAt,
+        ]
+      properties:
+        id:
+          type: string
+          example: sess_01JABCDEG
+        agentId:
+          type: string
+        workspaceId:
+          type: string
+        status:
+          $ref: "#/components/schemas/SessionStatus"
+        title:
+          type: string
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    SessionStatus:
+      type: string
+      enum: [idle, running, waiting_approval, failed, archived]
+
+    CreateSessionRequest:
+      type: object
+      required: [agentId, workspaceId]
+      properties:
+        agentId:
+          type: string
+        workspaceId:
+          type: string
+        title:
+          type: string
+        seedPrompt:
+          type: string
+
+    CreateMessageRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+        idempotencyKey:
+          type: string
+          description: Optional caller-provided key for deduplication.
+
+    RunAcceptedResponse:
+      type: object
+      required: [runId, sessionId, status, approvalId]
+      properties:
+        runId:
+          type: string
+          example: run_01JABCDEH
+        sessionId:
+          type: string
+        status:
+          $ref: "#/components/schemas/RunStatus"
+        approvalId:
+          type: string
+          example: apr_01JABCDEI
+
+    Run:
+      type: object
+      required: [id, sessionId, status, startedAt]
+      properties:
+        id:
+          type: string
+        sessionId:
+          type: string
+        status:
+          $ref: "#/components/schemas/RunStatus"
+        startedAt:
+          type: string
+          format: date-time
+        finishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        errorCode:
+          type: string
+          nullable: true
+        costUsd:
+          type: number
+          format: float
+          nullable: true
+
+    RunStatus:
+      type: string
+      enum: [queued, running, waiting_approval, completed, failed, canceled, orphaned]
+
+    TranscriptResponse:
+      type: object
+      required: [sessionId, nextSequence, events]
+      properties:
+        sessionId:
+          type: string
+        nextSequence:
+          type: integer
+          minimum: 1
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/TranscriptEvent"
+
+    TranscriptEvent:
+      type: object
+      required: [sequence, timestamp, event]
+      properties:
+        sequence:
+          type: integer
+          minimum: 1
+        timestamp:
+          type: string
+          format: date-time
+        event:
+          type: object
+          required: [type, payload]
+          properties:
+            type:
+              type: string
+              example: message_update
+            payload:
+              type: object
+              additionalProperties: true
+
+    ApprovalDecisionRequest:
+      type: object
+      required: [approvalId, actorId]
+      properties:
+        approvalId:
+          type: string
+          example: apr_01JABCDEI
+        actorId:
+          type: string
+        reason:
+          type: string
+
+    ApprovalDecisionResponse:
+      type: object
+      required: [approvalId, runId, state]
+      properties:
+        approvalId:
+          type: string
+        runId:
+          type: string
+        state:
+          $ref: "#/components/schemas/ApprovalState"
+        decidedAt:
+          type: string
+          format: date-time
+
+    ApprovalState:
+      type: string
+      enum: [approved, rejected, expired]
+
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          example: not_found
+        message:
+          type: string
+          example: Session not found

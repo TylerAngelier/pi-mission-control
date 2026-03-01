@@ -49,6 +49,31 @@ This repository contains a TypeScript workspace with:
    npm run dev
    ```
 
+## Test Instructions
+
+Run the full workspace test suite:
+
+```bash
+npm test
+```
+
+Run tests for a single package:
+
+```bash
+npm test --workspace @pi-mission-control/control-api
+npm test --workspace @pi-mission-control/worker
+npm test --workspace @pi-mission-control/web
+```
+
+Recommended verification order before committing:
+
+```bash
+npm run lint
+npm test
+npm run typecheck
+npm run build
+```
+
 ## Workspace Commands
 
 - `npm run build` — build all packages
