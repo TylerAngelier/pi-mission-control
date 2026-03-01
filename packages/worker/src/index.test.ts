@@ -9,6 +9,7 @@ import {
   InMemoryApprovalController,
   LocalWorkspaceManager,
   WorkerExecutionEngine,
+  createApprovalControllerFromEnv,
   health,
   normalizeRuntimeEvent,
   type CodingAgentRpcClient,
@@ -350,6 +351,19 @@ describe("InMemoryApprovalController", () => {
         actorId: "reviewer",
       })
     ).toThrow("Approval not pending");
+  });
+});
+
+describe("createApprovalControllerFromEnv", () => {
+  it("defaults to in-memory approval controller", () => {
+    const previousMode = process.env.PERSISTENCE_MODE;
+
+    delete process.env.PERSISTENCE_MODE;
+
+    const controller = createApprovalControllerFromEnv();
+    expect(controller).toBeInstanceOf(InMemoryApprovalController);
+
+    process.env.PERSISTENCE_MODE = previousMode;
   });
 });
 

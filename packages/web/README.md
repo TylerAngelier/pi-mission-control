@@ -4,7 +4,7 @@ Web application package for Pi Mission Control.
 
 ## Purpose
 
-This package will host the Pi Ops Console UI for:
+This package hosts Pi Ops Console-facing UI state primitives for:
 
 - browsing sessions/chats
 - prompting remote agents
@@ -13,9 +13,13 @@ This package will host the Pi Ops Console UI for:
 
 ## Current State
 
-Bootstrap scaffold with:
+Implemented with:
 
-- `src/index.ts` health helper
+- `src/session-store.ts` API-backed session store with:
+  - `/v1/ui/sessions` refresh support
+  - TTL cache behavior
+  - optional storage-backed offline cache fallback
+  - session SSE subscription and reconnect behavior
 - package-level lint/test/typecheck/build scripts
 
 ## Commands

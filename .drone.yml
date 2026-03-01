@@ -1,0 +1,145 @@
+kind: pipeline
+type: docker
+name: pr-main-quality
+
+trigger:
+  event:
+    - pull_request
+    - push
+    - cron
+    - custom
+
+steps:
+  - name: install
+    image: node:20-bookworm
+    environment:
+      npm_config_cache: .npm
+    commands:
+      - npm ci
+
+  - name: lint
+    image: node:20-bookworm
+    depends_on:
+      - install
+    environment:
+      npm_config_cache: .npm
+    commands:
+      - npm run lint
+
+  - name: typecheck
+    image: node:20-bookworm
+    depends_on:
+      - install
+    environment:
+      npm_config_cache: .npm
+    commands:
+      - npm run typecheck
+
+  - name: test
+    image: node:20-bookworm
+    depends_on:
+      - install
+    environment:
+      npm_config_cache: .npm
+    commands:
+      - npm test
+
+  - name: build
+    image: node:20-bookworm
+    depends_on:
+      - lint
+      - typecheck
+      - test
+    environment:
+      npm_config_cache: .npm
+    commands:
+      - npm run build
+
+  - name: wait-for-postgres
+    image: postgres:16-alpine
+    depends_on:
+      - build
+    commands:
+      - until pg_isready -h postgres-test -p 5432 -U postgres; do sleep 1; done
+
+  - name: integration-setup
+    image: node:20-bookworm
+    depends_on:
+      - wait-for-postgres
+    environment:
+      npm_config_cache: .npm
+      MISSION_CONTROL_TEST_DATABASE_URL: postgresql://postgres:postgres@postgres-test:5432/mission_control_test
+    commands:
+      - npm run test:setup-db
+
+  - name: integration-test
+    image: node:20-bookworm
+    depends_on:
+      - integration-setup
+    environment:
+      npm_config_cache: .npm
+      MISSION_CONTROL_TEST_DATABASE_URL: postgresql://postgres:postgres@postgres-test:5432/mission_control_test
+    commands:
+      - npm run test:integration
+
+  - name: integration-teardown
+    image: node:20-bookworm
+    depends_on:
+      - integration-test
+    environment:
+      npm_config_cache: .npm
+      MISSION_CONTROL_TEST_DATABASE_URL: postgresql://postgres:postgres@postgres-test:5432/mission_control_test
+    commands:
+      - npm run test:teardown-db
+    when:
+      status:
+        - success
+        - failure
+
+services:
+  - name: postgres-test
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mission_control_test
+
+---
+kind: pipeline
+type: docker
+name: docker-images
+
+trigger:
+  event:
+    - tag
+  ref:
+    - refs/tags/v*
+
+steps:
+  - name: build-control-api-image
+    image: plugins/docker
+    settings:
+      registry:
+        from_secret: docker_registry
+      repo: pi-mission-control/control-api
+      dockerfile: packages/control-api/Dockerfile
+      context: .
+      auto_tag: true
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+
+  - name: build-worker-image
+    image: plugins/docker
+    settings:
+      registry:
+        from_secret: docker_registry
+      repo: pi-mission-control/worker
+      dockerfile: packages/worker/Dockerfile
+      context: .
+      auto_tag: true
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password

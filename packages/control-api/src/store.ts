@@ -8,15 +8,14 @@ import type {
   Session,
   TranscriptEvent,
 } from "./types.js";
+import type {
+  ControlApiStore,
+  EnqueueMessageInput,
+  EnqueueResult,
+  RunEventListener,
+} from "./control-api-store.js";
 
-interface EnqueueResult {
-  run: Run;
-  approval: Approval;
-}
-
-type RunEventListener = (event: RunStreamEventEnvelope) => void;
-
-export class InMemoryControlApiStore {
+export class InMemoryControlApiStore implements ControlApiStore {
   private readonly agents = new Map<string, Agent>();
   private readonly sessions = new Map<string, Session>();
   private readonly runs = new Map<string, Run>();
@@ -121,7 +120,7 @@ export class InMemoryControlApiStore {
     };
   }
 
-  enqueueMessage(input: { sessionId: string; content: string }): EnqueueResult {
+  enqueueMessage(input: EnqueueMessageInput): EnqueueResult {
     const session = this.sessions.get(input.sessionId);
     if (!session) {
       throw new Error("Session not found");

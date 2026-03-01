@@ -8,7 +8,11 @@ export const health = (): WorkerHealth => ({
   status: "ok",
 });
 
-export { InMemoryApprovalController } from "./approval.js";
+export {
+  InMemoryApprovalController,
+  PostgresApprovalController,
+  createApprovalControllerFromEnv,
+} from "./approval.js";
 export { WorkerExecutionEngine, normalizeRuntimeEvent } from "./engine.js";
 export { CodingAgentSdkRpcRuntime } from "./runtime.js";
 export { LocalWorkspaceManager } from "./workspace.js";
@@ -16,6 +20,8 @@ export type {
   ApprovalController,
   ApprovalDecision,
   ApprovalRequest,
+  MutableApprovalController,
+  PostgresApprovalControllerOptions,
 } from "./approval.js";
 export type {
   CodingAgentRpcClient,

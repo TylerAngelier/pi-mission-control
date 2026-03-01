@@ -7,14 +7,21 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run --workspaces build",
-    "test": "npm run --workspaces test",
-    "test:coverage": "npm run --workspaces test:coverage",
+    "build": "npm run build --workspace @pi-mission-control/worker && npm run build --workspace @pi-mission-control/control-api && npm run build --workspace @pi-mission-control/web",
+    "test": "npm run build --workspace @pi-mission-control/worker && npm run build --workspace @pi-mission-control/control-api && npm run test --workspace @pi-mission-control/worker && npm run test --workspace @pi-mission-control/control-api && npm run test --workspace @pi-mission-control/web",
+    "test:coverage": "npm run build --workspace @pi-mission-control/worker && npm run build --workspace @pi-mission-control/control-api && npm run test:coverage --workspace @pi-mission-control/worker && npm run test:coverage --workspace @pi-mission-control/control-api && npm run test:coverage --workspace @pi-mission-control/web",
+    "test:integration": "npm run test:integration --workspace @pi-mission-control/control-api && npm run test:integration --workspace @pi-mission-control/worker",
     "lint": "npm run --workspaces lint",
-    "typecheck": "npm run --workspaces typecheck",
+    "typecheck": "npm run build --workspace @pi-mission-control/worker && npm run build --workspace @pi-mission-control/control-api && npm run typecheck --workspace @pi-mission-control/worker && npm run typecheck --workspace @pi-mission-control/control-api && npm run typecheck --workspace @pi-mission-control/web",
+    "migration:run": "npm run migration:run --workspace @pi-mission-control/control-api",
+    "migration:status": "npm run migration:status --workspace @pi-mission-control/control-api",
+    "migration:rollback": "npm run migration:rollback --workspace @pi-mission-control/control-api",
+    "test:setup-db": "npm run test:setup-db --workspace @pi-mission-control/control-api",
+    "test:teardown-db": "npm run test:teardown-db --workspace @pi-mission-control/control-api",
     "infra:up": "docker compose up",
     "infra:down": "docker compose down",
-    "dev": "concurrently -k -n infra,api,worker -c blue,green,magenta \"npm run infra:up\" \"npm run dev --workspace @pi-mission-control/control-api\" \"npm run dev --workspace @pi-mission-control/worker\""
+    "dev": "concurrently -k -n infra,api,worker -c blue,green,magenta \"npm run infra:up\" \"npm run dev --workspace @pi-mission-control/control-api\" \"npm run dev --workspace @pi-mission-control/worker\"",
+    "ci:drone:local": "bash scripts/ci/drone-local-validate.sh"
   },
   "devDependencies": {
     "@eslint/js": "^9.20.0",

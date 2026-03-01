@@ -11,5 +11,10 @@
     "test": "vitest run --config vitest.config.ts",
     "test:coverage": "vitest run --config vitest.config.ts --coverage",
     "lint": "eslint src --ext .ts"
+  },
+  "devDependencies": {
+    "@pi-mission-control/control-api": "0.1.0",
+    "supertest": "^7.1.1",
+    "@types/supertest": "^6.0.2"
   }
 }

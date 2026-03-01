@@ -367,6 +367,73 @@ describe("control-api routes", () => {
 
     await reader?.cancel();
   });
+  it("serves UI session summary and session subscribe endpoints", async () => {
+    const createAgent = await request(server)
+      .post("/v1/agents")
+      .set(authHeader)
+      .send({
+        name: "ui-session-agent",
+        model: "anthropic/claude-sonnet-4-5-20250929",
+      });
+
+    const createSession = await request(server)
+      .post("/v1/ui/sessions")
+      .set(authHeader)
+      .send({
+        agentId: createAgent.body.id,
+        workspaceId: "workspace_ui",
+        title: "UI Session",
+      });
+
+    expect(createSession.status).toBe(201);
+
+    const list = await request(server)
+      .get("/v1/sessions/list")
+      .set(authHeader)
+      .query({ workspaceId: "workspace_ui" });
+
+    expect(list.status).toBe(200);
+    expect(list.body.items).toHaveLength(1);
+
+    const uiSessions = await request(server)
+      .get("/v1/ui/sessions")
+      .set(authHeader);
+
+    expect(uiSessions.status).toBe(200);
+    const uiSession = (uiSessions.body.items as Array<Record<string, unknown>>).find(
+      (item) => item.id === createSession.body.id
+    );
+
+    expect(uiSession).toMatchObject({
+      id: createSession.body.id,
+      title: "UI Session",
+      status: "idle",
+    });
+
+    const response = await fetch(
+      `${getServerBaseUrl(server)}/v1/sessions/${createSession.body.id}/subscribe`,
+      {
+        method: "GET",
+        headers: {
+          authorization: "Bearer test-token",
+        },
+      }
+    );
+
+    expect(response.status).toBe(200);
+
+    const reader = response.body?.getReader();
+    expect(reader).toBeDefined();
+
+    const decoder = new TextDecoder();
+    const firstChunk = await reader?.read();
+    const output = firstChunk?.value ? decoder.decode(firstChunk.value, { stream: true }) : "";
+
+    expect(output).toContain("session_update");
+    expect(output).toContain(`"id":"${createSession.body.id}"`);
+
+    await reader?.cancel();
+  });
 });
 
 const getServerBaseUrl = (server: Server): string => {
