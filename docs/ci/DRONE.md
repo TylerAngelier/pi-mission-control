@@ -30,6 +30,7 @@ Integration environment:
 Notes:
 - Integration tests are intentionally **not** required for PRs in this initial setup (fast feedback loop).
 - Integration suites are run serially in control-api (`--maxWorkers=1`) because they reset shared DB schema.
+- Root `typecheck`/`build` run in explicit workspace dependency order (`worker` → `control-api` → `web`) so clean CI environments do not depend on pre-existing `dist/` artifacts for cross-workspace type resolution.
 
 ### 2) `docker-images` (optional)
 
