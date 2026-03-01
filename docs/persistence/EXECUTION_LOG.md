@@ -134,3 +134,41 @@ This execution log tracks the implementation of the persistence layer migration 
 - Implemented API-backed web session store with cache TTL and offline fallback behavior.
 - Added SSE subscription client logic with reconnect support in the web store.
 - Extended test coverage for new API/session-store behavior and preserved full workspace green checks.
+
+## 6.x Integration tooling hardening
+
+**Status:** 🟦 In Progress → 🟦 In Progress
+
+### Changes
+
+- `packages/control-api/src/scripts/test-db.ts`: added setup/teardown utility for test DB schema reset and migration bootstrap.
+- `packages/control-api/package.json`: added `test:setup-db` and `test:teardown-db` scripts.
+- `package.json`: added root passthrough scripts for test DB setup/teardown.
+- `docker-compose.test.yml`: added dedicated PostgreSQL test-compose environment.
+- `packages/control-api/src/persistence/persistence.integration.test.ts`: added direct NOTIFY/LISTEN integration assertion.
+- `packages/worker/src/approval.integration.test.ts`: added postgres-backed approval controller integration test scaffold.
+- `docs/persistence/WBS.md`: updated 6.x statuses and completion summaries.
+
+### Tests Added/Updated
+
+- `packages/control-api/src/persistence/persistence.integration.test.ts`: added pub/sub integration validation.
+- `packages/worker/src/approval.integration.test.ts`: added wait-for-decision approval integration test (env-gated).
+
+### Commands Run
+
+- `npm run typecheck --workspace @pi-mission-control/control-api && npm run typecheck --workspace @pi-mission-control/worker` → succeeded.
+- `npm run lint --workspace @pi-mission-control/control-api && npm run lint --workspace @pi-mission-control/worker` → succeeded.
+- `npm test --workspace @pi-mission-control/control-api && npm test --workspace @pi-mission-control/worker` → succeeded (integration tests skipped without test DB env).
+- `npm run typecheck && npm run lint && npm test && npm run build` → succeeded across all packages.
+
+### Notes
+
+- Integration tests remain env-gated and currently skip when `MISSION_CONTROL_TEST_DATABASE_URL` is unset.
+- 6.2.2 (full enqueue→approve→complete integration) remains open for fully wired persistent worker execution coverage.
+
+### Completion Summary
+
+- Added reusable DB setup/teardown automation for local integration testing.
+- Added explicit isolated docker-compose test environment definition.
+- Expanded integration coverage for postgres NOTIFY/LISTEN and worker approval-controller behavior.
+- Kept all workspace quality gates green after integration tooling additions.

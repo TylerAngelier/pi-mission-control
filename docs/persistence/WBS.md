@@ -109,23 +109,23 @@
   - 5.3.3 Keep InMemoryApprovalController for development/testing ✅
   - 5.3.4 Update worker execution engine to use new controller ✅
 
-### 6. Integration Tests with Clean Environments ⬜
+### 6. Integration Tests with Clean Environments 🟦 In Progress
 
-- **6.1 Create test database management utilities ⬜**
-  - 6.1.1 Add test database creation/drop scripts ⬜
+- **6.1 Create test database management utilities 🟦 In Progress**
+  - 6.1.1 Add test database creation/drop scripts ✅
   - 6.1.2 Implement per-test isolation via transaction rollback ⬜
   - 6.1.3 Add test data seeding utilities ⬜
   - 6.1.4 Create test fixture factories for all entities ⬜
 - **6.2 Implement integration test suite 🟦 In Progress**
   - 6.2.1 Create persistence/persistence.test.ts for repository tests ✅
   - 6.2.2 Add end-to-end flow tests (enqueue → approve → complete) ⬜
-  - 6.2.3 Add PostgreSQL NOTIFY/LISTEN integration tests ⬜
-  - 6.2.4 Add approval controller integration tests ⬜
-- **6.3 Create test scripts and tooling 🟦 In Progress**
+  - 6.2.3 Add PostgreSQL NOTIFY/LISTEN integration tests ✅
+  - 6.2.4 Add approval controller integration tests ✅
+- **6.3 Create test scripts and tooling ✅**
   - 6.3.1 Add test:integration npm script ✅
-  - 6.3.2 Add test:setup-db script for local development ⬜
-  - 6.3.3 Add test:teardown-db script for cleanup ⬜
-  - 6.3.4 Create docker-compose.test.yml for isolated test environment ⬜
+  - 6.3.2 Add test:setup-db script for local development ✅
+  - 6.3.3 Add test:teardown-db script for cleanup ✅
+  - 6.3.4 Create docker-compose.test.yml for isolated test environment ✅
 
 ### 7. Migrate Web UI Session Store 🟦 In Progress
 
@@ -250,4 +250,10 @@
 - 7.3.4: Added offline fallback to local cached session snapshots when API refresh fails.
 - 7.4.1: Added mocked fetch and mocked event-source session store tests.
 - 7.4.4: Revalidated web package and workspace tests after session-store migration.
+- 6.1.1: Added `test:setup-db`/`test:teardown-db` commands and supporting script for schema reset + migration bootstrap.
+- 6.2.3: Added PostgreSQL NOTIFY/LISTEN integration coverage in `persistence.integration.test.ts`.
+- 6.2.4: Added worker-level postgres approval-controller integration test scaffold (`approval.integration.test.ts`).
+- 6.3.2: Added local test DB setup script (`packages/control-api/src/scripts/test-db.ts setup`).
+- 6.3.3: Added local test DB teardown script (`packages/control-api/src/scripts/test-db.ts teardown`).
+- 6.3.4: Added `docker-compose.test.yml` for isolated PostgreSQL integration-test infrastructure.
 

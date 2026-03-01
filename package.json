@@ -16,6 +16,8 @@
     "migration:run": "npm run migration:run --workspace @pi-mission-control/control-api",
     "migration:status": "npm run migration:status --workspace @pi-mission-control/control-api",
     "migration:rollback": "npm run migration:rollback --workspace @pi-mission-control/control-api",
+    "test:setup-db": "npm run test:setup-db --workspace @pi-mission-control/control-api",
+    "test:teardown-db": "npm run test:teardown-db --workspace @pi-mission-control/control-api",
     "infra:up": "docker compose up",
     "infra:down": "docker compose down",
     "dev": "concurrently -k -n infra,api,worker -c blue,green,magenta \"npm run infra:up\" \"npm run dev --workspace @pi-mission-control/control-api\" \"npm run dev --workspace @pi-mission-control/worker\""

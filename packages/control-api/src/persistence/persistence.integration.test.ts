@@ -45,6 +45,21 @@ describe.skipIf(!runIntegration)("postgres persistence integration", () => {
     await db.close();
   });
 
+  it("publishes and receives postgres notifications", async () => {
+    const received: string[] = [];
+
+    const unsubscribe = await notifier.subscribe("integration_test_channel", (payload) => {
+      received.push(payload);
+    });
+
+    await notifier.publish("integration_test_channel", JSON.stringify({ ok: true }));
+
+    await new Promise((resolve) => setTimeout(resolve, 25));
+
+    await unsubscribe();
+    expect(received).toContain('{"ok":true}');
+  });
+
   it("persists entities, idempotency keys, replay, and transcript data", async () => {
     const createAgent = await request(app)
       .post("/v1/agents")

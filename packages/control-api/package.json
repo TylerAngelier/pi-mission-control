@@ -15,7 +15,9 @@
     "lint": "eslint src --ext .ts",
     "migration:run": "tsx src/scripts/migrations.ts run",
     "migration:status": "tsx src/scripts/migrations.ts status",
-    "migration:rollback": "tsx src/scripts/migrations.ts rollback"
+    "migration:rollback": "tsx src/scripts/migrations.ts rollback",
+    "test:setup-db": "tsx src/scripts/test-db.ts setup",
+    "test:teardown-db": "tsx src/scripts/test-db.ts teardown"
   },
   "dependencies": {
     "express": "^4.21.2",
