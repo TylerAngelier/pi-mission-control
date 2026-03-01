@@ -1,11 +1,20 @@
 import { randomUUID } from "node:crypto";
 
-import type { Agent, Approval, Run, Session, TranscriptEvent } from "./types.js";
+import type {
+  Agent,
+  Approval,
+  Run,
+  RunStreamEventEnvelope,
+  Session,
+  TranscriptEvent,
+} from "./types.js";
 
 interface EnqueueResult {
   run: Run;
   approval: Approval;
 }
+
+type RunEventListener = (event: RunStreamEventEnvelope) => void;
 
 export class InMemoryControlApiStore {
   private readonly agents = new Map<string, Agent>();
@@ -13,7 +22,10 @@ export class InMemoryControlApiStore {
   private readonly runs = new Map<string, Run>();
   private readonly approvals = new Map<string, Approval>();
   private readonly transcriptEventsBySession = new Map<string, TranscriptEvent[]>();
+  private readonly runEventsByRun = new Map<string, RunStreamEventEnvelope[]>();
+  private readonly runEventListenersByRun = new Map<string, Set<RunEventListener>>();
   private sequenceBySession = new Map<string, number>();
+  private runSequenceByRun = new Map<string, number>();
 
   listAgents(): Agent[] {
     return [...this.agents.values()];
@@ -86,6 +98,29 @@ export class InMemoryControlApiStore {
     return this.runs.get(runId);
   }
 
+  getRunEvents(runId: string, afterSequence = 0): RunStreamEventEnvelope[] {
+    const events = this.runEventsByRun.get(runId) ?? [];
+    return events.filter((event) => event.sequence > afterSequence);
+  }
+
+  subscribeToRunEvents(runId: string, listener: RunEventListener): () => void {
+    const listeners = this.runEventListenersByRun.get(runId) ?? new Set<RunEventListener>();
+    listeners.add(listener);
+    this.runEventListenersByRun.set(runId, listeners);
+
+    return () => {
+      const nextListeners = this.runEventListenersByRun.get(runId);
+      if (!nextListeners) {
+        return;
+      }
+
+      nextListeners.delete(listener);
+      if (nextListeners.size === 0) {
+        this.runEventListenersByRun.delete(runId);
+      }
+    };
+  }
+
   enqueueMessage(input: { sessionId: string; content: string }): EnqueueResult {
     const session = this.sessions.get(input.sessionId);
     if (!session) {
@@ -120,12 +155,12 @@ export class InMemoryControlApiStore {
       updatedAt: new Date().toISOString(),
     });
 
-    this.addTranscriptEvent(input.sessionId, "message_queued", {
+    this.addRunAndTranscriptEvent(run.id, input.sessionId, "message_queued", {
       runId: run.id,
       content: input.content,
     });
 
-    this.addTranscriptEvent(input.sessionId, "approval_required", {
+    this.addRunAndTranscriptEvent(run.id, input.sessionId, "approval_required", {
       runId: run.id,
       approvalId: approval.id,
       tool: "bash",
@@ -183,7 +218,7 @@ export class InMemoryControlApiStore {
       });
     }
 
-    this.addTranscriptEvent(run.sessionId, "approval_decided", {
+    this.addRunAndTranscriptEvent(run.id, run.sessionId, "approval_decided", {
       runId: run.id,
       approvalId: approval.id,
       state: nextApproval.state,
@@ -209,6 +244,16 @@ export class InMemoryControlApiStore {
     };
   }
 
+  private addRunAndTranscriptEvent(
+    runId: string,
+    sessionId: string,
+    type: string,
+    payload: Record<string, unknown>
+  ): void {
+    this.addTranscriptEvent(sessionId, type, payload);
+    this.addRunEvent(runId, sessionId, type, payload);
+  }
+
   private addTranscriptEvent(
     sessionId: string,
     type: string,
@@ -228,5 +273,39 @@ export class InMemoryControlApiStore {
     });
 
     this.transcriptEventsBySession.set(sessionId, events);
+  }
+
+  private addRunEvent(
+    runId: string,
+    sessionId: string,
+    type: string,
+    payload: Record<string, unknown>
+  ): void {
+    const runEvents = this.runEventsByRun.get(runId) ?? [];
+    const sequence = (this.runSequenceByRun.get(runId) ?? 0) + 1;
+    this.runSequenceByRun.set(runId, sequence);
+
+    const envelope: RunStreamEventEnvelope = {
+      sessionId,
+      runId,
+      sequence,
+      timestamp: new Date().toISOString(),
+      event: {
+        type,
+        payload,
+      },
+    };
+
+    runEvents.push(envelope);
+    this.runEventsByRun.set(runId, runEvents);
+
+    const listeners = this.runEventListenersByRun.get(runId);
+    if (!listeners) {
+      return;
+    }
+
+    for (const listener of listeners) {
+      listener(envelope);
+    }
   }
 }

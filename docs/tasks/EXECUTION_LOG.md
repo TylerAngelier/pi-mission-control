@@ -386,3 +386,69 @@
 - Added clear, actionable test workflow guidance at repo root.
 - Reduced onboarding ambiguity for full-suite vs package-only test runs.
 - Kept test gate green after documentation update.
+
+## 3.2.1 Implement stream gateway (WebSocket/SSE) with per-run sequence ordering
+
+**Status:** 🟦 In Progress → ✅ Done
+
+### Changes
+
+- `packages/control-api/src/store.ts`: added run-scoped event storage, per-run sequence counters, and pub/sub listeners.
+- `packages/control-api/src/types.ts`: added `RunStreamEventEnvelope` type for stream payloads.
+- `packages/control-api/src/app.ts`: added SSE endpoint `GET /v1/runs/:runId/stream` with backlog replay and live event delivery.
+- `packages/control-api/openapi/openapi.yaml`: documented stream endpoint for `text/event-stream` responses.
+- `packages/control-api/src/index.test.ts`: added integration test validating SSE response and in-order per-run sequence delivery.
+- `docs/tasks/TASKS.md`: marked `3.2.1` complete and updated completion summary.
+
+### Tests Added/Updated
+
+- `packages/control-api/src/index.test.ts`: added stream-ordering integration test for run event sequence envelopes.
+
+### Commands Run
+
+- `npm run lint --workspace @pi-mission-control/control-api && npm test --workspace @pi-mission-control/control-api && npm run typecheck --workspace @pi-mission-control/control-api` → all succeeded after stream implementation.
+- `npm run lint && npm test && npm run typecheck` → all workspace checks succeeded.
+
+### Notes
+
+- Gateway currently uses SSE and in-process memory pub/sub; durable replay cursor support is intentionally deferred to `3.2.2`.
+
+### Completion Summary
+
+- Delivered first live run-event streaming endpoint in the control API.
+- Guaranteed deterministic ordering via run-local sequence numbering.
+- Added test coverage to validate stream event ordering behavior.
+- Preserved green lint/test/typecheck gates across the workspace.
+
+## 3.2.2 Add reconnect cursor support (`lastSequence`) and replay endpoint
+
+**Status:** 🟦 In Progress → ✅ Done
+
+### Changes
+
+- `packages/control-api/src/app.ts`: added run replay endpoint `GET /v1/runs/:runId/events` with `fromSequence` validation.
+- `packages/control-api/src/app.ts`: extended SSE endpoint to support `lastSequence` cursor for reconnect semantics.
+- `packages/control-api/src/store.ts`: extended run event retrieval to support sequence-based filtering.
+- `packages/control-api/openapi/openapi.yaml`: documented replay endpoint, stream cursor query parameter, and replay/stream envelope schemas.
+- `packages/control-api/src/index.test.ts`: added integration test for replay and reconnect cursor behavior.
+- `docs/tasks/TASKS.md`: marked `3.2.2` complete and rolled up section statuses.
+
+### Tests Added/Updated
+
+- `packages/control-api/src/index.test.ts`: added replay endpoint + cursor-aware stream assertions.
+
+### Commands Run
+
+- `npm run lint --workspace @pi-mission-control/control-api && npm test --workspace @pi-mission-control/control-api && npm run typecheck --workspace @pi-mission-control/control-api` → all succeeded.
+- `npm run lint && npm test && npm run typecheck` → all workspace checks succeeded.
+
+### Notes
+
+- Replay endpoint currently serves in-memory event history for the running process; durable cross-restart replay remains a future persistence enhancement.
+
+### Completion Summary
+
+- Added explicit replay API for run event backfill.
+- Added reconnect cursor support to avoid re-sending already-consumed SSE events.
+- Kept stream contract and implementation aligned with OpenAPI updates.
+- Preserved green lint/test/typecheck gates across the repo.

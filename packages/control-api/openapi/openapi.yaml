@@ -194,6 +194,53 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  /v1/runs/{runId}/events:
+    parameters:
+      - $ref: "#/components/parameters/RunId"
+      - in: query
+        name: fromSequence
+        schema:
+          type: integer
+          minimum: 1
+    get:
+      tags: [Runs]
+      summary: Replay run-scoped event envelopes
+      operationId: getRunEventsReplay
+      responses:
+        "200":
+          description: Replay chunk for a single run event stream
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunEventsReplayResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/runs/{runId}/stream:
+    parameters:
+      - $ref: "#/components/parameters/RunId"
+      - in: query
+        name: lastSequence
+        schema:
+          type: integer
+          minimum: 0
+    get:
+      tags: [Runs]
+      summary: Stream run events as Server-Sent Events
+      operationId: streamRunEvents
+      responses:
+        "200":
+          description: SSE stream of run-scoped event envelopes
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                example: |
+                  event: approval_required
+                  data: {"sessionId":"sess_123","runId":"run_456","sequence":2,"timestamp":"2026-02-28T23:00:00.000Z","event":{"type":"approval_required","payload":{"approvalId":"apr_123"}}}
+        "404":
+          $ref: "#/components/responses/NotFound"
+
   /v1/runs/{runId}/approve:
     parameters:
       - $ref: "#/components/parameters/RunId"
@@ -459,6 +506,44 @@ components:
             payload:
               type: object
               additionalProperties: true
+
+    RunStreamEventEnvelope:
+      type: object
+      required: [sessionId, runId, sequence, timestamp, event]
+      properties:
+        sessionId:
+          type: string
+        runId:
+          type: string
+        sequence:
+          type: integer
+          minimum: 1
+        timestamp:
+          type: string
+          format: date-time
+        event:
+          type: object
+          required: [type, payload]
+          properties:
+            type:
+              type: string
+            payload:
+              type: object
+              additionalProperties: true
+
+    RunEventsReplayResponse:
+      type: object
+      required: [runId, nextSequence, events]
+      properties:
+        runId:
+          type: string
+        nextSequence:
+          type: integer
+          minimum: 1
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/RunStreamEventEnvelope"
 
     ApprovalDecisionRequest:
       type: object

@@ -182,6 +182,97 @@ export const createControlApiApp = (options: AppOptions = {}): express.Express =
     res.status(200).json(run);
   });
 
+  app.get("/v1/runs/:runId/events", (req, res) => {
+    const runId = getPathParam(req, res, "runId");
+    if (!runId) {
+      return;
+    }
+
+    const run = store.getRun(runId);
+    if (!run) {
+      res.status(404).json({ code: "not_found", message: "Run not found" });
+      return;
+    }
+
+    const fromSequence = req.query.fromSequence
+      ? Number(req.query.fromSequence)
+      : undefined;
+
+    if (fromSequence !== undefined && (!Number.isInteger(fromSequence) || fromSequence < 1)) {
+      res.status(400).json({
+        code: "invalid_request",
+        message: "fromSequence must be an integer >= 1",
+      });
+      return;
+    }
+
+    const events = store.getRunEvents(run.id, (fromSequence ?? 1) - 1);
+    const highestSequence = events.at(-1)?.sequence ?? (fromSequence ?? 1) - 1;
+
+    res.status(200).json({
+      runId: run.id,
+      nextSequence: highestSequence + 1,
+      events,
+    });
+  });
+
+  app.get("/v1/runs/:runId/stream", (req, res) => {
+    const runId = getPathParam(req, res, "runId");
+    if (!runId) {
+      return;
+    }
+
+    const run = store.getRun(runId);
+    if (!run) {
+      res.status(404).json({ code: "not_found", message: "Run not found" });
+      return;
+    }
+
+    const lastSequence = req.query.lastSequence
+      ? Number(req.query.lastSequence)
+      : 0;
+
+    if (!Number.isInteger(lastSequence) || lastSequence < 0) {
+      res.status(400).json({
+        code: "invalid_request",
+        message: "lastSequence must be an integer >= 0",
+      });
+      return;
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders();
+
+    const writeEnvelope = (event: {
+      event: { type: string };
+      sequence: number;
+    }) => {
+      if (event.sequence <= lastSequence) {
+        return;
+      }
+
+      res.write(`event: ${event.event.type}\n`);
+      res.write(`data: ${JSON.stringify(event)}\n\n`);
+    };
+
+    for (const event of store.getRunEvents(run.id, lastSequence)) {
+      writeEnvelope(event);
+    }
+
+    const unsubscribe = store.subscribeToRunEvents(run.id, writeEnvelope);
+    const heartbeatInterval = setInterval(() => {
+      res.write(": keep-alive\n\n");
+    }, 15000);
+
+    req.on("close", () => {
+      clearInterval(heartbeatInterval);
+      unsubscribe();
+      res.end();
+    });
+  });
+
   app.post("/v1/runs/:runId/approve", withZodValidation(approvalDecisionSchema), (req, res) => {
     const runId = getPathParam(req, res, "runId");
     if (!runId) {

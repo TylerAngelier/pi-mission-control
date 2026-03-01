@@ -65,3 +65,14 @@ export interface TranscriptEvent {
     payload: Record<string, unknown>;
   };
 }
+
+export interface RunStreamEventEnvelope {
+  sessionId: string;
+  runId: string;
+  sequence: number;
+  timestamp: string;
+  event: {
+    type: string;
+    payload: Record<string, unknown>;
+  };
+}
