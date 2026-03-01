@@ -14,7 +14,13 @@
   },
   "devDependencies": {
     "@pi-mission-control/control-api": "0.1.0",
-    "supertest": "^7.1.1",
-    "@types/supertest": "^6.0.2"
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/supertest": "^6.0.2",
+    "supertest": "^7.1.1"
+  },
+  "dependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   }
 }

@@ -582,3 +582,49 @@
 - Added deterministic decision handling for approve/reject/timeout outcomes.
 - Emitted normalized decision/failure events suitable for control-plane streaming.
 - Preserved green lint/test/typecheck/build gates across the monorepo.
+
+## 5.1.1 Compose pi-web-ui chat components with remote event adapter
+
+**Status:** In Progress → ✅ Done
+
+### Changes
+
+- `packages/web/package.json`: added React (`react`, `react-dom`) and React TypeScript type dependencies (`@types/react`, `@types/react-dom`).
+- `packages/web/tsconfig.json`: enabled React JSX compilation with `jsx: "react-jsx"` and `jsxImportSource: "react"`.
+- `packages/web/src/chat/types.ts`: defined chat component types including `ChatMessage`, `ToolCall`, `ExecutionEvent`, `ChatState`, `RemoteEventAdapterOptions`, and event payload interfaces (`MessageUpdateEvent`, `ToolCallEvent`, `ApprovalRequiredEvent`, etc.).
+- `packages/web/src/chat/remote-event-adapter.ts`: implemented `RemoteEventAdapter` class for connecting to control API SSE streams with automatic reconnect, run ID tracking, per-run sequence handling, and event normalization; added `createRemoteEventAdapter` factory function.
+- `packages/web/src/chat/components/ChatMessage.tsx`: created React component for displaying individual chat messages with role, timestamp, and formatted content.
+- `packages/web/src/chat/components/ToolCall.tsx`: created React component for displaying tool execution with status indicator, input/output/error display, and timestamp.
+- `packages/web/src/chat/components/Chat.tsx`: created main `Chat` React component integrating message list, tool calls, and execution events with auto-scroll and live status indicators.
+- `packages/web/src/chat/index.ts`: exported chat module types, adapter, and components for package consumers.
+- `packages/web/src/index.ts`: re-exported chat module APIs from web package root.
+
+### Tests Added/Updated
+
+- `packages/web/src/chat/remote-event-adapter.test.ts`: added comprehensive unit tests for `RemoteEventAdapter` covering connection state management, event handling (message updates, tool calls, approval events), run lifecycle tracking, and error scenarios; added `MockEventSource` polyfill for Node.js test environment.
+
+### Commands Run
+
+- `cd packages/web && npm install --save react react-dom && npm install --save-dev @types/react @types/react-dom` → succeeded; installed React dependencies.
+- `rm -rf node_modules package-lock.json packages/*/node_modules && npm install` → succeeded; resolved rollup dependency issues.
+- `cd packages/web && npm run typecheck` → succeeded after adding JSX support and fixing type issues.
+- `cd packages/web && npm run test` → succeeded; all 16 tests passed including 8 new remote-event-adapter tests.
+- `npm run lint` → succeeded after fixing unused variables and adding `@ts-expect-error` descriptions.
+- `npm run typecheck` → succeeded across all workspace packages.
+- `npm run build` → succeeded; all packages compiled successfully.
+- `npm test` → succeeded; all workspace tests passed (worker: 14, control-api: 12, web: 16).
+
+### Notes
+
+- pi-web-ui was not available as a dependency, so built custom React chat components from scratch instead.
+- EventSource API required polyfill for Node.js test environment; used `MockEventSource` with `@ts-expect-error` for partial implementation.
+- Component naming conflicts resolved by using type aliases (`ChatMessageType`, `ToolCallType`) to avoid clashes with component names.
+- Remote event adapter supports SSE streaming with automatic reconnect and state tracking for runs and tool calls.
+
+### Completion Summary
+
+- Delivered full chat UI module with React components for messages, tool calls, and event streaming.
+- Implemented `RemoteEventAdapter` that connects to control API SSE, normalizes events, and maintains run/tool state.
+- Added comprehensive test coverage for adapter behavior including connection lifecycle, event handling, and state management.
+- Established React build pipeline with JSX compilation and type safety.
+- Preserved green lint/test/typecheck/build gates across the entire workspace.

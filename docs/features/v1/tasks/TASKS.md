@@ -57,10 +57,10 @@
   - 4.2.1 Add policy matcher for risky tool calls (bash/edit/write categories) 🚫 Won't Complete
   - 4.2.2 Implement pause/resume flow for approve/reject/timeout ✅
 
-### 5. Web Application Integration ⬜
+### 5. Web Application Integration 🟦
 
-- **5.1 Session Console UI ⬜**
-  - 5.1.1 Compose pi-web-ui chat components with remote event adapter ⬜
+- **5.1 Session Console UI 🟦**
+  - 5.1.1 Compose pi-web-ui chat components with remote event adapter ✅
   - 5.1.2 Build session/task sidebar and run status indicators ⬜
 - **5.2 Review and Intervention UX ⬜**
   - 5.2.1 Add execution timeline (tool calls, logs, state transitions) ⬜
@@ -95,7 +95,7 @@
 - 4.1.2: Added `LocalWorkspaceManager` with explicit create/mount/cleanup lifecycle for isolated worker directories, including symlink-based repo mount tracking and error handling for missing/already-mounted workspaces; expanded worker tests to cover lifecycle success and error paths; validated full workspace lint/test/typecheck/build.
 - 4.2.1: Marked 🚫 Won't Complete for v1 scope; policy matcher categorization will be deferred to a future version while keeping approval flow support available.
 - 4.2.2: Added pause/resume approval flow in worker execution engine with `InMemoryApprovalController` handling approve/reject/timeout decisions, plus tests for approved, rejected, timed out, and missing-controller paths; validated full workspace lint/test/typecheck/build.
-- 5.1.1: _(empty until completed)_
+- 5.1.1: Installed React and TypeScript React types; created chat component types and interfaces (`ChatMessage`, `ToolCall`, `ExecutionEvent`, `RemoteEventAdapterOptions`, etc.); implemented `RemoteEventAdapter` class for connecting to control API SSE streams with automatic reconnect, run ID tracking, and event normalization; created React components (`Chat`, `ChatMessage`, `ToolCall`) for displaying messages and tool executions; added comprehensive unit tests for `RemoteEventAdapter` covering connection state management, event handling (message updates, tool calls, approval events), and run lifecycle tracking; updated `packages/web/tsconfig.json` to enable React JSX compilation; exported chat module APIs from `packages/web/src/index.ts` and `packages/web/src/chat/index.ts`; validated full workspace lint/test/typecheck/build.
 - 5.1.2: _(empty until completed)_
 - 5.2.1: _(empty until completed)_
 - 5.2.2: _(empty until completed)_
