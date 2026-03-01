@@ -1,5 +1,7 @@
 # Pi Mission Control
 
+[![CI (Drone)](https://drone.trangelier.dev/api/badges/TylerAngelier/pi-mission-control/status.svg)](https://drone.trangelier.dev/TylerAngelier/pi-mission-control)
+
 Web control plane for remote pi agents.
 
 This repository contains a TypeScript workspace with:
@@ -105,6 +107,11 @@ npm run build
 - `npm run migration:run` / `npm run migration:status` / `npm run migration:rollback` — manage control-api migrations
 - `npm run test:setup-db` / `npm run test:teardown-db` — reset integration test database
 - `npm run test:integration` — run postgres integration tests
+
+## CI/CD (Drone)
+
+- Pipeline definition: `.drone.yml`
+- Setup + branch protection + troubleshooting: `docs/ci/DRONE.md`
 
 ## Project Status
 
