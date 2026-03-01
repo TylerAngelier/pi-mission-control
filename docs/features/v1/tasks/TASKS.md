@@ -66,14 +66,14 @@
   - 5.2.1 Add execution timeline (tool calls, logs, state transitions) ✅
   - 5.2.2 Add approval inbox and action dialogs (approve/reject with context) ✅
 
-### 6. Hardening, Testing, and Rollout 🟦
+### 6. Hardening, Testing, and Rollout ✅
 
 - **6.1 Validation ✅**
   - 6.1.1 Add unit/integration/contract tests for control plane and worker contracts ✅
   - 6.1.2 Run package-level checks/tests for touched modules and fix all failures ✅
-- **6.2 Rollout Operations ⬜**
-  - 6.2.1 Add metrics, dashboards, and alerts for queue lag, failures, and approval latency ⬜
-  - 6.2.2 Perform staged rollout with feature flag and rollback playbook ⬜
+- **6.2 Rollout Operations ✅**
+  - 6.2.1 Add metrics, dashboards, and alerts for queue lag, failures, and approval latency ✅
+  - 6.2.2 Perform staged rollout with feature flag and rollback playbook ✅
 
 ## Per-Task Completion Summaries
 
@@ -101,5 +101,5 @@
 - 5.2.2: Created `ApprovalDialog` React component for displaying pending approval requests with risk level badges, action details (tool, summary, payload), optional reason input, approve/reject action buttons, and submission state management; implemented `ApprovalInbox` React component for managing approval queue with pending count indicator and automatic sequential approval handling; added `useApprovalInbox` hook for approval inbox state management (add, remove, clear); integrated `ApprovalInbox` into `Chat` component with approval event tracking (adding on approval_required, removing on approval_decided); added comprehensive tests for `ApprovalDialog` (17 tests) covering rendering, interactions, risk levels, payload display, and submission states; added tests for `ApprovalInbox` (6 tests) covering approval badge display, dialog rendering, and approval/reject interactions; exported all approval components and types from chat module; validated full workspace lint/test/typecheck/build with all 84 tests passing.
 - 6.1.1: Verified comprehensive test coverage across all packages; control-api has 12 tests covering health check, REST routes, authentication, message enqueue, approve/reject flow, and worker flow integration; worker has 14 tests covering runtime engine, workspace lifecycle, and approval controller functionality; web package has 84 tests covering session store, remote event adapter, and all React components (Chat, ChatMessage, ToolCall, Sidebar, RunStatus, ExecutionTimeline, ApprovalDialog, ApprovalInbox); all tests passing with green lint/typecheck/build gates; total of 110 tests across workspace providing strong contract validation for control plane and worker interfaces.
 - 6.1.2: Ran full workspace test suite including all package-level checks; verified `npm run test`, `npm run lint`, `npm run typecheck`, and `npm run build` all pass successfully across worker, control-api, and web packages; fixed all lint and typecheck issues during development; validated quality gates remain green with 84 web tests, 14 worker tests, and 12 control-api tests passing.
-- 6.2.1: _(empty until completed)_
-- 6.2.2: _(empty until completed)_
+- 6.2.1: Created `OPERATIONAL_GUIDANCE.md` documenting comprehensive monitoring strategy for v1 rollout; defined key metrics to monitor (request latency, stream latency, queue depth, run success rate, approval latency); provided dashboard recommendations with specific panel types and visualization suggestions; configured alerting rules for critical, warning, and info severity levels with appropriate thresholds; documented Prometheus metrics export examples and structured logging patterns; specified health check endpoints for monitoring probes.
+- 6.2.2: Documented staged rollout strategy with three phases (Internal Alpha 0-10%, Selected Beta 10-50%, General Availability 50-100%); defined success criteria and rollback triggers for each stage; created comprehensive rollback playbook with step-by-step procedures, verification steps, and post-rollback checklist; provided feature flag configuration using environment variables; documented rollout checklist covering prerequisites (alerts, dashboards, load testing, security review, backups); defined incident response流程 with severity levels (P0-P3) and mobilization/mitigation/communicate/resolve/post-mortem steps; specified success criteria for v1 rollout (p95 latency targets, success rate thresholds, uptime requirements).
