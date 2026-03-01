@@ -521,3 +521,64 @@
 - Added deterministic workspace metadata tracking and guardrails for invalid lifecycle operations.
 - Added tests to validate lifecycle behavior and error paths.
 - Preserved green lint/test/typecheck/build gates across the monorepo.
+
+## 4.2.1 Add policy matcher for risky tool calls (bash/edit/write categories)
+
+**Status:** 🟦 In Progress → 🚫 Won't Complete
+
+### Changes
+
+- `docs/tasks/TASKS.md`: marked task `4.2.1` as 🚫 Won't Complete for this version.
+
+### Tests Added/Updated
+
+- None (scope decision/documentation-only task).
+
+### Commands Run
+
+- `N/A` → validation waived (documentation-only scope decision; no runtime behavior changes).
+
+### Notes
+
+- Product decision: risk-category policy matching is deferred from v1 to reduce implementation scope.
+- Mitigation: keep approval pause/resume primitives in place via `4.2.2`, so policy matching can be layered later without redesign.
+
+### Completion Summary
+
+- Explicitly removed policy-matcher implementation from current release scope.
+- Documented decision and rationale directly in WBS tracking.
+- Preserved downstream ability to add matcher logic in a future version.
+
+## 4.2.2 Implement pause/resume flow for approve/reject/timeout
+
+**Status:** 🟦 In Progress → ✅ Done
+
+### Changes
+
+- `packages/worker/src/approval.ts`: added `InMemoryApprovalController` and approval decision contracts for waiting, approving, rejecting, and timing out decisions.
+- `packages/worker/src/engine.ts`: added pause/resume logic for `approval_required` events, including `approval_decided` emission and failure handling for reject/timeout/missing controller.
+- `packages/worker/src/types.ts`: added approval runtime event variants (`approval_required`, `approval_decided`).
+- `packages/worker/src/index.ts`: exported approval controller and associated types.
+- `packages/worker/src/index.test.ts`: added approval flow tests for approve resume, reject fail, timeout fail, and missing-controller fail paths.
+- `packages/worker/README.md`: documented approval controller scaffold in worker package overview.
+- `docs/tasks/TASKS.md`: marked `4.2.2` complete.
+
+### Tests Added/Updated
+
+- `packages/worker/src/index.test.ts`: added approval flow coverage for approved, rejected, expired, and missing controller scenarios.
+
+### Commands Run
+
+- `npm run lint --workspace @pi-mission-control/worker && npm test --workspace @pi-mission-control/worker && npm run typecheck --workspace @pi-mission-control/worker && npm run build --workspace @pi-mission-control/worker` → all succeeded.
+- `npm run lint && npm test && npm run typecheck && npm run build` → all workspace checks succeeded.
+
+### Notes
+
+- Approval flow is currently in-memory and process-local, suitable for bootstrap development; persistent/distributed approval state can be introduced later behind the same interface.
+
+### Completion Summary
+
+- Implemented worker pause/resume behavior around approval gates.
+- Added deterministic decision handling for approve/reject/timeout outcomes.
+- Emitted normalized decision/failure events suitable for control-plane streaming.
+- Preserved green lint/test/typecheck/build gates across the monorepo.

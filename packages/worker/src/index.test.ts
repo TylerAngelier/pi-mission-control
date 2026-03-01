@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   CodingAgentSdkRpcRuntime,
+  InMemoryApprovalController,
   LocalWorkspaceManager,
   WorkerExecutionEngine,
   health,
@@ -100,6 +101,168 @@ describe("WorkerExecutionEngine", () => {
       },
     });
   });
+
+  it("pauses for approval and resumes when approved", async () => {
+    const runtime = {
+      async *streamRun() {
+        yield { type: "run_status", status: "running" } as const;
+        yield {
+          type: "approval_required",
+          approvalId: "apr_1",
+          toolName: "bash",
+          riskLevel: "high",
+          timeoutMs: 100,
+        } as const;
+        yield { type: "assistant_text_delta", delta: "resumed" } as const;
+        yield { type: "run_completed" } as const;
+      },
+    };
+
+    const engine = new WorkerExecutionEngine(runtime);
+    const approvalController = new InMemoryApprovalController(
+      () => new Date("2026-03-01T00:00:00.000Z")
+    );
+
+    const executionPromise = engine.executeRun(
+      {
+        sessionId: "sess_a",
+        runId: "run_a",
+        agentId: "agent_a",
+        prompt: "do risky thing",
+      },
+      { approvalController }
+    );
+
+    setTimeout(() => {
+      approvalController.approve({
+        runId: "run_a",
+        approvalId: "apr_1",
+        actorId: "reviewer_1",
+      });
+    }, 0);
+
+    const result = await executionPromise;
+
+    expect(result.events.map((event) => event.event.type)).toEqual([
+      "run_status_changed",
+      "approval_required",
+      "approval_decided",
+      "message_update",
+      "run_completed",
+    ]);
+  });
+
+  it("fails run when approval is rejected", async () => {
+    const runtime = {
+      async *streamRun() {
+        yield {
+          type: "approval_required",
+          approvalId: "apr_2",
+          toolName: "edit",
+          riskLevel: "high",
+          timeoutMs: 100,
+        } as const;
+        yield { type: "run_completed" } as const;
+      },
+    };
+
+    const engine = new WorkerExecutionEngine(runtime);
+    const approvalController = new InMemoryApprovalController();
+
+    const executionPromise = engine.executeRun(
+      {
+        sessionId: "sess_b",
+        runId: "run_b",
+        agentId: "agent_b",
+        prompt: "edit file",
+      },
+      { approvalController }
+    );
+
+    setTimeout(() => {
+      approvalController.reject({
+        runId: "run_b",
+        approvalId: "apr_2",
+        actorId: "reviewer_2",
+        reason: "too risky",
+      });
+    }, 0);
+
+    const result = await executionPromise;
+
+    expect(result.events.at(-1)?.event).toEqual({
+      type: "run_failed",
+      payload: {
+        code: "approval_rejected",
+        message: "too risky",
+      },
+    });
+  });
+
+  it("fails run when approval times out", async () => {
+    const runtime = {
+      async *streamRun() {
+        yield {
+          type: "approval_required",
+          approvalId: "apr_3",
+          toolName: "write",
+          riskLevel: "high",
+          timeoutMs: 1,
+        } as const;
+      },
+    };
+
+    const engine = new WorkerExecutionEngine(runtime);
+    const approvalController = new InMemoryApprovalController();
+
+    const result = await engine.executeRun(
+      {
+        sessionId: "sess_c",
+        runId: "run_c",
+        agentId: "agent_c",
+        prompt: "write file",
+      },
+      { approvalController }
+    );
+
+    expect(result.events.at(-1)?.event).toEqual({
+      type: "run_failed",
+      payload: {
+        code: "approval_timeout",
+        message: "Approval request timed out",
+      },
+    });
+  });
+
+  it("fails run when approval controller is missing", async () => {
+    const runtime = {
+      async *streamRun() {
+        yield {
+          type: "approval_required",
+          approvalId: "apr_4",
+          toolName: "bash",
+          riskLevel: "high",
+          timeoutMs: 100,
+        } as const;
+      },
+    };
+
+    const engine = new WorkerExecutionEngine(runtime);
+    const result = await engine.executeRun({
+      sessionId: "sess_d",
+      runId: "run_d",
+      agentId: "agent_d",
+      prompt: "dangerous command",
+    });
+
+    expect(result.events.at(-1)?.event).toEqual({
+      type: "run_failed",
+      payload: {
+        code: "approval_controller_missing",
+        message: "Approval controller is required for approval_required events",
+      },
+    });
+  });
 });
 
 describe("CodingAgentSdkRpcRuntime", () => {
@@ -145,6 +308,48 @@ describe("normalizeRuntimeEvent", () => {
         message: "approval expired",
       },
     });
+  });
+
+  it("maps approval required events to control-plane event shape", () => {
+    expect(
+      normalizeRuntimeEvent({
+        type: "approval_required",
+        approvalId: "apr_norm",
+        toolName: "bash",
+        riskLevel: "high",
+        timeoutMs: 30000,
+      })
+    ).toEqual({
+      type: "approval_required",
+      payload: {
+        approvalId: "apr_norm",
+        toolName: "bash",
+        riskLevel: "high",
+        timeoutMs: 30000,
+      },
+    });
+  });
+});
+
+describe("InMemoryApprovalController", () => {
+  it("throws when resolving unknown approvals", () => {
+    const controller = new InMemoryApprovalController();
+
+    expect(() =>
+      controller.approve({
+        runId: "run_missing",
+        approvalId: "apr_missing",
+        actorId: "reviewer",
+      })
+    ).toThrow("Approval not pending");
+
+    expect(() =>
+      controller.reject({
+        runId: "run_missing",
+        approvalId: "apr_missing",
+        actorId: "reviewer",
+      })
+    ).toThrow("Approval not pending");
   });
 });
 

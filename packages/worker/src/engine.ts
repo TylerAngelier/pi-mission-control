@@ -1,3 +1,4 @@
+import type { ApprovalController } from "./approval.js";
 import type { WorkerRuntime } from "./runtime.js";
 import type {
   RunStreamEventEnvelope,
@@ -7,6 +8,7 @@ import type {
 } from "./types.js";
 
 export interface ExecuteRunOptions {
+  approvalController?: ApprovalController;
   onEvent?: (event: RunStreamEventEnvelope) => void;
 }
 
@@ -40,6 +42,52 @@ export class WorkerExecutionEngine {
     try {
       for await (const event of this.runtime.streamRun(input)) {
         publish(event);
+
+        if (event.type !== "approval_required") {
+          continue;
+        }
+
+        const approvalController = options.approvalController;
+        if (!approvalController) {
+          publish({
+            type: "run_failed",
+            code: "approval_controller_missing",
+            message: "Approval controller is required for approval_required events",
+          });
+          return { events };
+        }
+
+        const decision = await approvalController.waitForDecision({
+          runId: input.runId,
+          approvalId: event.approvalId,
+          timeoutMs: event.timeoutMs,
+        });
+
+        publish({
+          type: "approval_decided",
+          approvalId: event.approvalId,
+          state: decision.state,
+          actorId: decision.actorId,
+          reason: decision.reason,
+          decidedAt: decision.decidedAt,
+        });
+
+        if (decision.state !== "approved") {
+          const failureCode =
+            decision.state === "expired" ? "approval_timeout" : "approval_rejected";
+
+          publish({
+            type: "run_failed",
+            code: failureCode,
+            message:
+              decision.reason ??
+              (decision.state === "expired"
+                ? "Approval request timed out"
+                : "Approval request rejected"),
+          });
+
+          return { events };
+        }
       }
     } catch (error) {
       publish({
@@ -107,6 +155,27 @@ export const normalizeRuntimeEvent = (
         type: "run_status_changed",
         payload: {
           status: runtimeEvent.status,
+        },
+      };
+    case "approval_required":
+      return {
+        type: "approval_required",
+        payload: {
+          approvalId: runtimeEvent.approvalId,
+          toolName: runtimeEvent.toolName,
+          riskLevel: runtimeEvent.riskLevel,
+          timeoutMs: runtimeEvent.timeoutMs,
+        },
+      };
+    case "approval_decided":
+      return {
+        type: "approval_decided",
+        payload: {
+          approvalId: runtimeEvent.approvalId,
+          state: runtimeEvent.state,
+          actorId: runtimeEvent.actorId,
+          reason: runtimeEvent.reason,
+          decidedAt: runtimeEvent.decidedAt,
         },
       };
     case "run_completed":

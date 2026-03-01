@@ -44,6 +44,21 @@ export type WorkerRuntimeEvent =
       status: "queued" | "running" | "waiting_approval";
     }
   | {
+      type: "approval_required";
+      approvalId: string;
+      toolName: string;
+      riskLevel: "low" | "medium" | "high";
+      timeoutMs: number;
+    }
+  | {
+      type: "approval_decided";
+      approvalId: string;
+      state: "approved" | "rejected" | "expired";
+      actorId: string | null;
+      reason: string | null;
+      decidedAt: string;
+    }
+  | {
       type: "run_completed";
       usage?: {
         inputTokens: number;

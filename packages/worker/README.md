@@ -14,6 +14,7 @@ Bootstrap scaffold with:
 - `src/engine.ts` event normalization + sequence-aware execution engine
 - `src/runtime.ts` SDK/RPC runtime adapter abstraction
 - `src/workspace.ts` local workspace lifecycle manager (`create`, `mount`, `cleanup`)
+- `src/approval.ts` in-memory approval controller for approve/reject/timeout pause-resume flow
 - `src/dev.ts` placeholder dev process
 - package-level lint/test/typecheck/build scripts
 
