@@ -7,12 +7,21 @@ import type { ChatMessage, ToolCall, ExecutionEvent } from "../types.js";
 import { RemoteEventAdapter } from "../remote-event-adapter.js";
 import { ChatMessage as ChatMessageComponent } from "./ChatMessage.js";
 import { ToolCall as ToolCallComponent } from "./ToolCall.js";
+import { RunStatus } from "./RunStatus.js";
 
 export interface ChatProps {
   sessionId: string;
   apiBaseUrl: string;
   authToken: string;
   initialMessages?: ChatMessage[];
+  runStatus?: {
+    runId?: string;
+    status?: "queued" | "running" | "waiting_approval" | "completed" | "failed" | "canceled" | "orphaned";
+    costUsd?: number | null;
+    startedAt?: string;
+    finishedAt?: string | null;
+    errorCode?: string | null;
+  };
 }
 
 export const Chat: React.FC<ChatProps> = ({
@@ -20,6 +29,7 @@ export const Chat: React.FC<ChatProps> = ({
   apiBaseUrl,
   authToken,
   initialMessages = [],
+  runStatus,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [toolCalls, setToolCalls] = useState<ToolCall[]>([]);
@@ -92,17 +102,24 @@ export const Chat: React.FC<ChatProps> = ({
       <div className="chat__header">
         <h2 className="chat__title">Session {sessionId}</h2>
         <div className="chat__status">
-          {currentRunId ? (
-            <span className="chat__status-indicator chat__status-indicator--running">
-              Running
-            </span>
+          {runStatus ? (
+            <RunStatus
+              runId={runStatus.runId || currentRunId}
+              status={runStatus.status}
+              costUsd={runStatus.costUsd}
+              startedAt={runStatus.startedAt}
+              finishedAt={runStatus.finishedAt}
+              errorCode={runStatus.errorCode}
+            />
           ) : (
-            <span className="chat__status-indicator chat__status-indicator--idle">
-              Idle
+            <span className="chat__status-indicator">
+              {currentRunId ? (
+                <span className="chat__status-indicator--running">Running</span>
+              ) : (
+                <span className="chat__status-indicator--idle">Idle</span>
+              )}
+              {isStreaming && <span className="chat__stream-indicator">● Live</span>}
             </span>
-          )}
-          {isStreaming && (
-            <span className="chat__stream-indicator">● Live</span>
           )}
         </div>
       </div>

@@ -6,14 +6,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { RemoteEventAdapter, type RunStreamEventEnvelope } from "./remote-event-adapter.js";
 
 // Mock EventSource for Node.js test environment
-// @ts-expect-error Partial EventSource implementation for testing
-class MockEventSource extends EventTarget implements EventSource {
+class MockEventSource extends EventTarget {
   public readonly url: string;
   public readonly withCredentials: boolean;
-  public readyState: 0 | 1 | 2 = 0; // CONNECTING
-  public CONNECTING: 0 = 0;
-  public OPEN: 1 = 1;
-  public CLOSED: 2 = 2;
+  public readyState = 0 as 0 | 1 | 2; // CONNECTING
+  public CONNECTING = 0 as const;
+  public OPEN = 1 as const;
+  public CLOSED = 2 as const;
   public onerror: ((this: EventSource, ev: Event) => unknown) | null = null;
   public onmessage: ((this: EventSource, ev: MessageEvent) => unknown) | null = null;
   public onopen: ((this: EventSource, ev: Event) => unknown) | null = null;

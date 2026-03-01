@@ -628,3 +628,50 @@
 - Added comprehensive test coverage for adapter behavior including connection lifecycle, event handling, and state management.
 - Established React build pipeline with JSX compilation and type safety.
 - Preserved green lint/test/typecheck/build gates across the entire workspace.
+
+## 5.1.2 Build session/task sidebar and run status indicators
+
+**Status:** In Progress → ✅ Done
+
+### Changes
+
+- `packages/web/src/chat/components/Sidebar.tsx`: created React `Sidebar` component for displaying session list with status icons, active session highlighting, create button, loading/empty states, and relative timestamp formatting.
+- `packages/web/src/chat/components/RunStatus.tsx`: created React `RunStatus` component for displaying run state with status icons, run ID, cost, start/finish times, and error codes.
+- `packages/web/src/chat/components/Chat.tsx`: added optional `runStatus` prop to `ChatProps` interface and integrated `RunStatus` component into the chat header.
+- `packages/web/src/chat/components/Sidebar.test.tsx`: added comprehensive tests (12 tests) for sidebar rendering, empty/loading states, active session highlighting, click interactions, status icons, and timestamp formatting.
+- `packages/web/src/chat/components/RunStatus.test.tsx`: added comprehensive tests (18 tests) for run status rendering, status icons, metadata display (run ID, cost, timestamps, errors), and edge cases (null cost, undefined values).
+- `packages/web/package.json`: added testing dependencies (`@testing-library/react`, `@testing-library/jest-dom`, `jsdom`, `@types/testing-library__jest-dom`, `@vitest/coverage-v8`).
+- `packages/web/vitest.config.ts`: configured Vitest to use jsdom environment for React component testing with globals enabled and setup file for @testing-library/jest-dom matchers.
+- `packages/web/vitest.setup.ts`: created setup file to import @testing-library/jest-dom extensions.
+- `packages/web/src/chat/index.ts`: exported `Sidebar`, `RunStatus` components and their associated TypeScript types.
+
+### Tests Added/Updated
+
+- `packages/web/src/chat/components/Sidebar.test.tsx`: 12 tests covering sidebar behavior including rendering, session selection, create button, status display, and timestamp formatting.
+- `packages/web/src/chat/components/RunStatus.test.tsx`: 18 tests covering all run states, metadata display, and edge cases.
+
+### Commands Run
+
+- `cd packages/web && npm install --save-dev @testing-library/react @testing-library/jest-dom jsdom @vitest/coverage-v8` → succeeded; installed React testing dependencies.
+- `cd packages/web && npm install --save-dev @types/testing-library__jest-dom` → succeeded; installed jest-dom type definitions.
+- `cd packages/web && npm run test` → succeeded; all 46 tests passed (including 30 new component tests).
+- `npm run lint` → succeeded after fixing unused import and MockEventSource type issues.
+- `npm run typecheck` → succeeded after fixing session-store type compatibility and array indexing issues.
+- `npm run build` → succeeded; all packages compiled successfully.
+- `npm test` → succeeded; all workspace tests passed (worker: 14, control-api: 12, web: 46).
+
+### Notes
+
+- SessionStatus type from session-store does not include "archived", so Sidebar and tests only use supported statuses (idle, running, waiting_approval, failed).
+- MockEventSource simplified to not implement full EventSource interface to avoid type conflicts; only needed for basic connection testing.
+- Vitest configured with `globals: true` to enable describe/it/expect without explicit imports.
+- jsdom environment required for React component testing in Node.js test runner.
+
+### Completion Summary
+
+- Delivered fully functional Sidebar component for session navigation and management.
+- Delivered RunStatus component for displaying comprehensive run state information.
+- Integrated run status display into Chat component header.
+- Established React component testing infrastructure with @testing-library and jsdom.
+- Added comprehensive test coverage for all new UI components (30 component tests).
+- Preserved green lint/test/typecheck/build gates across the entire workspace.
