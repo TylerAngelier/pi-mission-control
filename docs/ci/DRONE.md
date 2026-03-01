@@ -18,7 +18,7 @@ Stages:
 3. `typecheck` → `npm run typecheck`
 4. `test` → `npm test`
 5. `build` → `npm run build`
-6. (main only) postgres-backed integration flow:
+6. postgres-backed integration flow (runs on PRs and pushes):
    - `wait-for-postgres`
    - `integration-setup` → `npm run test:setup-db`
    - `integration-test` → `npm run test:integration`
@@ -28,9 +28,9 @@ Integration environment:
 - `MISSION_CONTROL_TEST_DATABASE_URL=postgresql://postgres:postgres@postgres-test:5432/mission_control_test`
 
 Notes:
-- Integration tests are intentionally **not** required for PRs in this initial setup (fast feedback loop).
 - Integration suites are run serially in control-api (`--maxWorkers=1`) because they reset shared DB schema.
 - Root `typecheck`/`build` run in explicit workspace dependency order (`worker` → `control-api` → `web`) so clean CI environments do not depend on pre-existing `dist/` artifacts for cross-workspace type resolution.
+- Root `test`/`test:coverage` also prebuild dependent workspaces so Vitest can resolve cross-workspace package entrypoints in clean CI runs.
 
 ### 2) `docker-images` (optional)
 
@@ -87,7 +87,7 @@ Or run the local Drone parity script:
 npm run ci:drone:local
 ```
 
-For full parity with main-branch integration job:
+For full parity with CI integration job:
 
 ```bash
 docker compose -f docker-compose.test.yml up -d
