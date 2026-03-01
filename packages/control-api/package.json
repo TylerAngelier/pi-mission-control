@@ -11,7 +11,7 @@
     "dev": "tsx --env-file=../../.env src/dev.ts",
     "test": "vitest run --config vitest.config.ts",
     "test:coverage": "vitest run --config vitest.config.ts --coverage",
-    "test:integration": "vitest run --config vitest.config.ts src/*.integration.test.ts src/**/*.integration.test.ts",
+    "test:integration": "vitest run --config vitest.config.ts src/*.integration.test.ts src/**/*.integration.test.ts --maxWorkers=1",
     "lint": "eslint src --ext .ts",
     "migration:run": "tsx src/scripts/migrations.ts run",
     "migration:status": "tsx src/scripts/migrations.ts status",
