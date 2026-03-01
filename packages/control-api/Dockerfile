@@ -9,7 +9,8 @@ COPY packages/web/package.json packages/web/package.json
 RUN npm ci
 
 COPY . .
-RUN npm run build --workspace @pi-mission-control/control-api
+RUN npm run build --workspace @pi-mission-control/worker \
+  && npm run build --workspace @pi-mission-control/control-api
 
 FROM node:20-alpine AS runtime
 WORKDIR /app
